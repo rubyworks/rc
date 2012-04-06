@@ -1,0 +1,8 @@
+---
+- finder
+- facets   # ultimately 2.9.4+
+- blankslate (optional test)
+- detroit (build)
+- qed     (test)
+- ae      (test)
+

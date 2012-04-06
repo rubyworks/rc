@@ -1,0 +1,27 @@
+#!mast -x man/*/index.txt .ruby .yardopts bin lib man spec test [A-Z]*.*
+.ruby
+.yardopts
+lib/c.rb
+lib/rc/config.rb
+lib/rc/core_ext.rb
+lib/rc/interface.rb
+lib/rc/parser.rb
+lib/rc/processor.rb
+lib/rc/project.rb
+lib/rc/properties.rb
+lib/rc.rb
+spec/00_concept.md
+spec/01_dsl.md
+spec/02_import.md
+spec/03_store.md
+spec/04_controller.md
+spec/05_config.md
+spec/06_manage.md
+spec/applique/ae.rb
+spec/applique/file.rb
+spec/applique/fixture/config.rb
+spec/applique/fixture.rb
+LICENSE.txt
+HISTORY.md
+README.md
+Config.rb

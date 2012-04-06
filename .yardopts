@@ -1,0 +1,8 @@
+--title "Runtime Configuration"
+--readme README.rdoc
+--protected
+--private
+lib/**/*.rb
+-
+[A-Z]*.*
+
