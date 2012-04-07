@@ -18,3 +18,15 @@ class Symbol
     "#{self}/#{other}".to_sym
   end
 end
+
+module Kernel
+  #
+  # Evaluate script directory into current scope.
+  #
+  def import(feature)
+    file = Find.load_path(feature).first
+    raise LoadError, "no such file -- #{feature}" unless file
+    instance_eval(::File.read(file), file) if file
+  end
+end
+

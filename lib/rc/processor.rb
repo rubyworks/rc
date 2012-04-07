@@ -53,7 +53,7 @@ module RC
         RC.current_tool    = opts[:tool]    if opts[:tool]
         RC.current_profile = opts[:profile] if opts[:profile]
         begin
-          require file
+          load(file, true)
         ensure
           RC.current_tool    = current_tool
           RC.current_profile = current_profile

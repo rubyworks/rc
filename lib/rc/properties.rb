@@ -4,6 +4,8 @@ module RC
   # This will be expanded upon in future version to allow 
   # additional customization.
   #
+  # @todo Lookup project root directory.
+  #
   class Properties
 
     #

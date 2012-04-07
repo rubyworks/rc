@@ -12,9 +12,6 @@ module RC
   require 'rc/processor'
   require 'rc/properties'
   require 'rc/interface'
-
-  #require 'rc/config'
-  #require 'rc/project'
 end
 
 # Bootstrap properties

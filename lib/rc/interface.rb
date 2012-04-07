@@ -13,29 +13,23 @@ module RC
   #   * `Config.rb`
   #   * `config.rb`
   #
-  FILE_PATTERN = '{.,}{confile,config}{.rb,}'
+  FILE_PATTERN = '{.c,C,c}onfig{.rb,}'
 
   #
-  def self.config(gem=nil)
-    @config ||= {}
-    @config[gem.to_s] ||= (
+  def self.configuration(gem=nil)
+    if gem
       file = find(gem)
-      Parser.parse(file)
-    )
+    else
+      file = lookup
+    end
+    file ? Parser.parse(file) : {}
   end
 
   #
   def self.profiles(tool, options={})
-    tool = tool.to_sym
+    tool = tool.to_s
     gem  = options[:from]
     config(gem)[tool].keys
-  end
-
-  #
-  # Per library cache.
-  #
-  def self.cache
-    @cache ||= {}
   end
 
   #
@@ -48,37 +42,17 @@ module RC
   #
   # @return [Project,nil] Located project.
   #
-  def self.find(lib=nil)
-    if lib
-      lib = lib.to_s
-      return cache[lib] if cache.key?(lib)
-      cache[lib] ||= (
-        config_path = Find.path(FILE_PATTERN, :from=>lib).first
-        config_path ? new(File.dirname(config_path)) : nil
-      )
-    else
-      lookup
-    end
+  def self.find(lib)
+    lib = lib.to_s
+    return cache[lib] if cache.key?(lib)
+    cache[lib] ||= Find.path(FILE_PATTERN, :from=>lib).first
   end
 
   #
-  # Lookup project configuation file.
   #
-  # @param dir [String]
-  #   Optional directory to begin search.
   #
-  # @return [String] file path
-  #
-  def self.lookup(dir=nil)
-    dir = dir || Dir.pwd
-    home = File.expand_path('~')
-    while dir != '/' && dir != home
-      if file = Dir.glob(File.join(dir, FILE_PATTERN), File::FNM_CASEFOLD).first
-        return file
-      end
-      dir = File.dirname(dir)
-    end
-    return nil
+  def self.lookup
+    Dir[FILE_PATTERN].first
   end
 
   #
@@ -90,15 +64,15 @@ module RC
   # Given a tool name, it simply looks for a class or module
   # with a capialized or all uppercase form of the same name.
   #
-  def self.scope(tool)
-    name = tool.to_s.capitalize
-    if Object.const_defined?(name)
-      mod = Object.const_get(name)
-    elsif Object.const_defined?(name.upcase)
-      mod = Object.const_get(name.upcase)
-    end
-    return mod if Module === mod
-  end
+#  def self.scope(tool)
+#    name = tool.to_s.capitalize
+#    if Object.const_defined?(name)
+#      mod = Object.const_get(name)
+#    elsif Object.const_defined?(name.upcase)
+#      mod = Object.const_get(name.upcase)
+#    end
+#    return mod if Module === mod
+#  end
 
   #
   #
@@ -137,22 +111,6 @@ module RC
     $properties ||= Properties.new
   end
   
-  #def self.properties
-  #  $properties ||= (
-  #    file = lookup
-  #    dir  = File.dirname(file)
-  #
-  #    dotruby = File.join(dir,'.ruby')
-  #
-  #    if File.exist?(dotruby)
-  #      data = YAML.load_file(dotruby)
-  #      OpenStruct.new(data)
-  #    else
-  #      OpenStruct.new
-  #    end
-  #  )    
-  #end
-
   #
   #
   #
@@ -163,8 +121,13 @@ module RC
     ## extend toplevel with confection processor
     toplevel.extend(RC::Processor)
 
+    #tool    = ENV['tool']    || $0
+    #profile = ENV['profile'] || 'default'
+
+    #configuration.invoke(tool,profile)
+
     if file = Dir.glob('./{.c,c,C}onfig.rb').first
-      require file
+      load(file, true)
     end
   end
 
