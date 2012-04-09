@@ -1,3 +1,5 @@
+require 'rake'
+
 module Rake
   RC_FILES = '.config.rb', 'config.rb', 'Config.rb'
 

@@ -10,12 +10,6 @@ copyrights:
   license: BSD-2-Clause
 requirements:
 - name: finder
-- name: facets
-- name: blankslate
-  groups:
-  - optional
-  - test
-  development: true
 - name: detroit
   groups:
   - build
@@ -32,23 +26,24 @@ dependencies: []
 alternatives: []
 conflicts: []
 repositories:
-- uri: git://github.com/rubyworks/confection.git
+- uri: git://github.com/rubyworks/rc.git
   scm: git
   name: upstream
 resources:
-  home: http://rubyworks.github.com/confection
-  docs: http://rubydoc.info/gems/confection/frames
-  code: http://github.com/rubyworks/confection
+  home: http://rubyworks.github.com/rc
+  docs: http://rubydoc.info/gems/rc/frames
+  code: http://github.com/rubyworks/rc
   mail: http://groups.google.com/group/rubyworks-mailinglist
+  chat: http://chat.us.freenode.net/rubyworks
 extra: {}
 load_path:
 - lib
 revision: 0
 created: '2011-11-06'
-summary: Multi-tenant configuration for Ruby
+summary: Multi-tenant configuration for Ruby.
 title: RC
-version: 0.3.0
+version: 0.1.0
 name: rc
-description: Confection is a multi-tenant configuration system for Ruby projects.
+description: RC is a multi-tenant configuration system for Ruby projects.
 organization: Rubyworks
 date: '2012-03-11'

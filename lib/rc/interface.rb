@@ -136,11 +136,14 @@ module RC
   def self.bootstrap
     properties  # prime global properties
 
-    require current_tool
-
     tweak = File.join(File.dirname(__FILE__), 'tweaks', current_tool + '.rb')
     if File.exist?(tweak)
       require tweak
+    else
+      begin
+        require current_tool
+      rescue LoadError      
+      end
     end
 
     if proc = processor(current_tool)
