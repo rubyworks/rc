@@ -38,12 +38,14 @@ resources:
 extra: {}
 load_path:
 - lib
+name: rc
+title: RC
 revision: 0
 created: '2011-11-06'
 summary: Multi-tenant configuration for Ruby.
-title: RC
 version: 0.1.0
-name: rc
-description: RC is a multi-tenant configuration system for Ruby projects.
+description: ! "RC is a multi-tenant configuration system for Ruby projects.\nIt is
+  a spin-off of the original Confection project with\na simplifed overall design and
+  the ability to work with \nalmost any Ruby-based command line tool."
 organization: Rubyworks
-date: '2012-03-11'
+date: '2012-04-09'
