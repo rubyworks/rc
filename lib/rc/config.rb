@@ -110,20 +110,21 @@ module RC
     #
     #
     def match?(tool, profile)
-      return false unless self.tool    == tool.to_sym
-      return false unless self.profile == profile.to_sym
-      return true
+      tool    = tool.to_sym
+      profile = profile.to_sym if profile
+
+      self.tool == tool && self.profile == profile
     end
 
     #
-    #
+    # Does the given `tool` match the config's tool?
     #
     def tool?(tool)
       self.tool == tool.to_sym
     end
 
     #
-    #
+    # Does the given `profile` match the config's profile?
     #
     def profile?(profile)
       self.profile == profile.to_sym
