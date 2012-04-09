@@ -8,13 +8,17 @@ module RC
     include Enumerable
 
     #
+    # Initialize new ToolConfiguration.
     #
+    # @param [String,Symbol] Tool name.
     #
-    def initialize(tool, configs)
+    # @param [Configuraiton] Project configuration instance.
+    #
+    def initialize(tool, configuration)
       include configuration
 
       @_tool = tool.to_s
-      @_list = configs
+      @_list = configuration.select{ |c| c.tool?(tool) }
     end   
 
     #
