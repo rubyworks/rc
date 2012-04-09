@@ -1,4 +1,14 @@
 module RC
+  # External requirements.
+  require 'yaml'
+  require 'finder'
+
+  # Internal requirements.
+  require 'rc/core_ext'
+  require 'rc/config'
+  require 'rc/configuration'
+  require 'rc/tool_configuration'
+  require 'rc/properties'
 
   #
   # Configuration file pattern. The standard configuration file name is
@@ -21,9 +31,14 @@ module RC
   end
 
   #
+  def self.clear!
+    @cache = {}
+  end
+
+  #
   def self.configuration(gem=nil)
-    gem = gem ? gem.to_s : gem
-    cache[gem] ||= Configuration.new(:from=>gem)
+    key = gem ? gem.to_s : nil #Dir.pwd
+    cache[key] ||= Configuration.load(:from=>gem)
   end
 
   #
@@ -53,14 +68,18 @@ module RC
   # Get current profile.
   #
   def self.current_profile
-    ENV['profile'] || 'default'
+    ENV['profile']
   end
 
   #
   # Set current profile.
   #
   def self.current_profile=(profile)
-    ENV['profile'] = (profile || 'default').to_s
+    if profile
+      ENV['profile'] = profile.to_s
+    else
+      ENV['profile'] = nil
+    end
   end
 
   #
@@ -103,11 +122,11 @@ module RC
   # Setup configuration.
   #
   def self.configure(options={})
-    tool    = (options[:tool]    || current_tool).to_s
-    profile = (options[:profile] || current_profile).to_s
+    tool    = options[:tool]    || current_tool
+    profile = options[:profile] || current_profile
 
-    configuration[tool][profile].each do |block|
-      block.call
+    configuration.each do |c|
+      c.call if c.match?(tool, profile)
     end
   end
 
@@ -123,6 +142,12 @@ module RC
     else
       configure
     end
+  end
+
+  # @todo: I'm sure this, #bootstrap and #processor can be simplifed.
+  def self.run(tool, &block)
+    processor(tool, &block)
+    require 'rc'
   end
 
 end
