@@ -26,23 +26,37 @@ module RC
     ROOT_INDICATORS = %w{.git .hg _darcs} #.ruby
 
     #
+    # Load configuration file from local project or other gem.
+    #
+    # @param options [Hash] Load options.
+    #
+    # @option options [String] :from
+    #   Name of gem or library.
+    #
+    def self.load(options={})
+      if from = options[:from]
+        file = Find.path(CONFIG_FILE, :from=>from).first
+      else
+        file = lookup(CONFIG_FILE)
+      end
+      new(file)
+    end
+
+    #
     # Initialize new Configuration object.
     #
-    def initialize(options={})
-      @library = options[:from]
+    # @param [String] file
+    #   Configuration file (optional).
+    #
+    def initialize(file=nil)
+      @file = file
 
       @_list  = []
       @_state = {}
 
-      if @library
-        @file = Find.path(CONFIG_FILE, :from=>@library).first
-      else
-        @file = lookup(CONFIG_FILE)
-      end
-
       # TODO: does this rescue make sense here?
       begin
-        import(@file) if @file
+        import_relative(@file) if @file
       rescue => e
         raise e if $DEBUG
         warn e.message
@@ -51,6 +65,9 @@ module RC
 
     #
     # Profile block.
+    #
+    # @param [String,Symbol] name
+    #   A profile name.
     #
     def profile(name, &block)
       raise SyntaxError, "nested profile sections" if @_state[:profile]
@@ -109,14 +126,10 @@ module RC
 
       profile = @_state[:profile] unless profile
 
-      tool    = tool.to_s
-      profile = (profile || 'default').to_s
-
       if from
         from_config  = RC.configuration(from)
-        from_tool    = (options[:tool]    || tool).to_s
-        from_profile = (options[:profile] || profile).to_s
-
+        from_tool    = options[:tool]    || tool
+        from_profile = options[:profile] || profile
         from_config.each do |c|
           if c.match?(from_tool, from_profile)
             @_list << Config.new(tool, profile, &c)
@@ -140,8 +153,7 @@ module RC
     # @return [ToolConfiguration] Subset of Configuration.
     #
     def [](tool)
-      subset = @_list.select{ |c| c.tool?(tool) }
-      ToolConfiguration.new(tool, subset)
+      ToolConfiguration.new(tool, self)
     end
 
     # Configuration is Enumerable.
@@ -162,7 +174,7 @@ module RC
     #
     # Search upward from working directory.
     #
-    def lookup(glob, flags=0)
+    def self.lookup(glob, flags=0)
       pwd  = File.expand_path(Dir.pwd)
       home = File.expand_path('~')
       while pwd != '/' && pwd != home
