@@ -54,8 +54,8 @@ module RC
     # @param [Proc] procedure
     #   The configuration procedure.
     #
-    def block=(proc)
-      @block = proc.to_proc
+    def block=(block)
+      @block = block.to_proc
     end
 
     #

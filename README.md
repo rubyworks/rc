@@ -117,13 +117,13 @@ interface, or the tool has been customized to directly support RC.
 ## Customization (WORK IN PROGRESS)
 
 A tool can provide dedicated support for RC by loading the `rc/interface` script
-and defining a `processor` procedure. For example, the `detroit` project defines:
+and defining a `run` procedure. For example, the `detroit` project defines:
 
-  require 'rc/interface'
+    require 'rc/interface'
 
-  RC.processor('detroit') do |configs|
-    Detroit.rc_configs = configs
-  end
+    RC.run('detroit') do |configs|
+      Detroit.rc_configs = configs
+    end
 
 When `detroit` gets around to loading a project's build assemblies, it will
 check this setting and evaluate the configs via Detroit's confgiruation DSL.
@@ -133,15 +133,16 @@ process configuration. Probably the most common use for this is to parse
 commandline arguments for a profile setting as an alternative to normal
 environment variable.
 
-  RC.processor('qed') do
-    if i = ARGV.index('--profile') || ARGV.index('-p')
-      ENV['profile'] = ARGV[i+1]
+    RC.run('qed') do
+      if i = ARGV.index('--profile') || ARGV.index('-p')
+        ENV['profile'] = ARGV[i+1]
+      end
     end
-  end
 
-RC doesn't read the profile environment variable until after the
-`preprocessor` is executed, so this allows time for the `ENV['profile']`
-setting to be overridden.
+The `run` method forces the loading of `rc`, which triggers tool configuration,
+regardless of whether the end-user has set `RUBYOPT="-rc"`. If you wish for your
+tool to only work when `RUBYOPT` is set, then define `RC.processor` instead of
+`run`.
 
 
 ## Dependencies

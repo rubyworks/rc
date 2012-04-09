@@ -144,7 +144,7 @@ module RC
     end
 
     if proc = processor(current_tool)
-      tool_config = ToolConfiguration.new(tool, configuration)
+      tool_config = ToolConfiguration.new(current_tool, configuration)
       proc.call(tool_config)
     else
       configure

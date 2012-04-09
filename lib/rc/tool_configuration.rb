@@ -45,7 +45,7 @@ module RC
     #
     #
     #
-    def size(&block)
+    def size
       @_list.size
     end
 
