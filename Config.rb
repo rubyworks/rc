@@ -9,8 +9,8 @@ config :detroit do
                 'rubyworks-mailinglist@googlegroups.com']
   end
 
-  service :dnote do |s|
-    s.active = true
+  service :gem do |s|
+    s.gemspec = 'pkg/rc.gemspec'
   end
 
   service :github do |s|
