@@ -11,7 +11,7 @@
 
 ## Description
 
-RC (short for `Runtime Configuration`) is multi-tenant configuration system
+RC, short for *Runtime Configuration*, is multi-tenant configuration system
 for Ruby tools. If was designed to facilitate Ruby-based configuration for
 multiple tools in a single file. It is extremely simple, and univerally applicable
 which makes it easy to understand and flexible in use.
@@ -19,11 +19,16 @@ which makes it easy to understand and flexible in use.
 
 ## Installation
 
-First install RC in the usual manner via RubyGems.
+To use RC via tools that support RC directly, there is nothing you need to
+install. Installing the said tool should install `rc` via a dependency and
+load `rc` when the tool is used.
 
-  $ gem install rc
+To use RC with tools that don't provide direct support, first install RC
+in the usual manner via RubyGems.
 
-Now add `-rc` to the `RUBYOPT` environment variable.
+    $ gem install rc
+
+Then add `-rc` to your system's `RUBYOPT` environment variable.
 
     $ export RUBYOPT='-rc'
 
@@ -49,9 +54,6 @@ use this to configure Rake tasks.
 
 Now when `rake` is run the tasks defined in this configuration will be available.
 
-(NOTE: There is one caveat to using RC for Rake like this. Rake still needs
-the 'Rakefile' to locate a project's root directory.)
-
 You might wonder why anyone would do this. That's where the *multi-tenancy*
 comes into play. Let's add another configuration.
 
@@ -75,15 +77,7 @@ project while pulling our tool configurations together into one place.
 Moreover, these configurations can potentially share settings as demonstrated
 here via the `title` local variable.
 
-RC also supports profiles, either via a `profile` block or via a
-second config argument.
-
-    config :qed, :cov do
-      require 'simplecov'
-      ...
-    end
-
-Or,
+RC also supports profiles, either via a `profile` block:
 
     profile :cov
       config :qed do
@@ -92,20 +86,35 @@ Or,
       end
     end
 
+Or via a second config argument:
+
+    config :qed, :cov do
+      require 'simplecov'
+      ...
+    end
+
 When utilizing the tool, set the profile via an environment variable.
 
     $ profile='cov' qed
 
+Some tools that support RC out-of-the-box, may support a profile command
+line option for specifying the profile.
+
+    $ qed -p cov
+
+Still other tools might utilize profiles to a more specific purpose of
+the tool at hand. Consult the tool's documentation for details.
+
 
 ## Qualifications
 
-RC can be used with any Ruby-based commandline tool can be required by the
-same name as the tool, e.g. `rake` can be required via `require 'rake'`,
+RC can be used with any Ruby-based commandline tool that can be required by
+the same name as the tool, e.g. `rake` can be required via `require 'rake'`,
 and there exists some means of configuring the tool via a toplevel/global
-interface, or has been customized to directly support RC.
+interface, or the tool has been customized to directly support RC.
 
 
-## Customization
+## Customization (WORK IN PROGRESS)
 
 A tool can provide dedicated support for RC by loading the `rc/interface` script
 and defining a `processor` procedure. For example, the `detroit` project defines:
@@ -124,7 +133,7 @@ process configuration. Probably the most common use for this is to parse
 commandline arguments for a profile setting as an alternative to normal
 environment variable.
 
-  RC.preprocessor('qed') do
+  RC.processor('qed') do
     if i = ARGV.index('--profile') || ARGV.index('-p')
       ENV['profile'] = ARGV[i+1]
     end
