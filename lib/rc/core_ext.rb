@@ -1,27 +1,6 @@
-# All core extensions come from Ruby Facets to maintain high standard for
-# careful core extensions.
-
-require 'facets/string/tabto'
-#require 'facets/to_hash'
-require 'facets/binding/self'
-
-#require 'facets/ostruct/to_h'  # TODO: Newer version of facets.
-require 'ostruct'
-class OpenStruct
-  def to_h
-    @table.dup
-  end
-end
-
-class Symbol
-  def /(other)
-    "#{self}/#{other}".to_sym
-  end
-end
-
 module Kernel
   #
-  # Evaluate script directory into current scope.
+  # Evaluate script directly into current scope.
   #
   def import(feature)
     file = Find.load_path(feature).first
@@ -29,4 +8,34 @@ module Kernel
     instance_eval(::File.read(file), file) if file
   end
 end
+
+class Hash
+  def to_h
+    dup #rehash
+  end unless method_defined?(:to_h)
+end
+
+class String
+  def tabto(n)
+    if self =~ /^( *)\S/
+      indent(n - $1.length)
+    else
+      self
+    end
+  end unless method_defined?(:tabto)
+
+  def indent(n, c=' ')
+    if n >= 0
+      gsub(/^/, c * n)
+    else
+      gsub(/^#{Regexp.escape(c)}{0,#{-n}}/, "")
+    end
+  end unless method_defined?(:indent)
+end
+
+#class Symbol
+#  def /(other)
+#    "#{self}/#{other}".to_sym
+#  end
+#end
 

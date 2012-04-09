@@ -99,21 +99,40 @@ When utilizing the tool, set the profile via an environment variable.
 
 ## Qualifications
 
-As long as a Ruby-based commandline tool can be required by the same name as
-the tool, e.g. `rake` can be required via `require 'rake'`, and there exists
-some means of configuring the tool via a toplevel/global interface, than RC
-can be used.
+RC can be used with any Ruby-based commandline tool can be required by the
+same name as the tool, e.g. `rake` can be required via `require 'rake'`,
+and there exists some means of configuring the tool via a toplevel/global
+interface, or has been customized to directly support RC.
 
-A tool can provide dedicated support for RC by simply defining toplevel
-class method called `rc_{tool}`. For example, the `detroit` project defines:
 
-  def self.rc_detroit(&block)
-    @rc_detroit = block if block
-    @rc_detroit
+## Customization
+
+A tool can provide dedicated support for RC by loading the `rc/interface` script
+and defining a `processor` procedure. For example, the `detroit` project defines:
+
+  require 'rc/interface'
+
+  RC.processor('detroit') do |configs|
+    Detroit.rc_configs = configs
   end
 
 When `detroit` gets around to loading a project's build assemblies, it will
-check this setting and evaluate the block via Detroit's confgiruation DSL.
+check this setting and evaluate the configs via Detroit's confgiruation DSL.
+
+Some tools may also need to run preconfiguration code before allowing RC to
+process configuration. Probably the most common use for this is to parse
+commandline arguments for a profile setting as an alternative to normal
+environment variable.
+
+  RC.preprocessor('qed') do
+    if i = ARGV.index('--profile') || ARGV.index('-p')
+      ENV['profile'] = ARGV[i+1]
+    end
+  end
+
+RC doesn't read the profile environment variable until after the
+`preprocessor` is executed, so this allows time for the `ENV['profile']`
+setting to be overridden.
 
 
 ## Dependencies
@@ -122,17 +141,14 @@ check this setting and evaluate the block via Detroit's confgiruation DSL.
 
 RC depends on the [Finder](http://rubyworks.github.com/finder) library
 to provide reliable load path and Gem searching. This is used when importing
-configurations from external projects.
-
-To use RC on Ruby 1.8 series, the `BlankSlate` library is also needed
-in order to emulate Ruby's BasicObject. (This may change to the `Backports`
-project in a future version.)
+configurations from other projects.
 
 ### Core Extensions
 
 RC uses two core extensions, `#to_h`, which applies to a few different
-classes, and `String#tabto`. These are copied from [Ruby Facets](http://rubyworks.github.com/facets)
-to ensure a high standard of interoperability.
+classes, and `String#tabto`. These are *copied* from
+[Ruby Facets](http://rubyworks.github.com/facets) to ensure a high
+standard of interoperability.
 
 Both of these methods have been suggested for inclusion in Ruby proper.
 Please head over to Ruby Issue Tracker and add your support.

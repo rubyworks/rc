@@ -1,16 +1,6 @@
 # Runtime Configuration system.
 #
 module RC
-  # External requirements.
-  require 'yaml'
-  require 'ostruct'
-  require 'finder'
-
-  # Internal requirements.
-  require 'rc/core_ext'
-  require 'rc/parser'
-  require 'rc/processor'
-  require 'rc/properties'
   require 'rc/interface'
 end
 

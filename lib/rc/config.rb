@@ -1,4 +1,4 @@
-module Confection
+module RC
 
   # Config encapsulates a single configuration entry as defined
   # in a project's configuration file.
@@ -9,13 +9,10 @@ module Confection
     # Initialize Config instance. Config instances are per-configuration,
     # which means they are associated with one and only one config entry.
     #
-    def initialize(tool, profile, context, value, &block)
+    def initialize(tool, profile, &block)
       self.tool    = tool
       self.profile = profile
-      self.value   = value
-      self.block   = block if block
-
-      @context = context
+      self.block   = block
     end
 
     #
@@ -45,26 +42,6 @@ module Confection
     end
 
     #
-    # Some configuration are simple values. In those cases
-    # the `@value` attributes holds the object, otherwise it
-    # is `nil`. 
-    #
-    def value
-      @value
-    end
-
-    #
-    # Set the configuration value.
-    #
-    # @param [Object] value
-    #   The configuration value.
-    #
-    def value=(value)
-      @block = nil
-      @value = value
-    end
-
-    #
     # Most configuration are scripted. In thos cases the 
     # `@block` attributes holds the Proc instance, otherwise
     # it is `nil`.
@@ -78,7 +55,6 @@ module Confection
     #   The configuration procedure.
     #
     def block=(proc)
-      @value = nil
       @block = proc.to_proc
     end
 
@@ -92,55 +68,27 @@ module Confection
     end
 
     #
-    # Call the procedure. Configuration procedures are evaluated
-    # in the scope of a per-configuration file context instance,
-    # which is extended by the {DSL} evaluation context.
+    # Call the configuration procedure.
     #
     def call(*args)
-      #@value || @block.call(*args)
-      @value || @context.instance_exec(*args, &block)
+      block.call(*args)
     end
 
     #
-    # Convert the underlying procedure into an `instance_exec`
-    # procedure. This allows the procedure to be evaluated in
-    # any scope that it is be needed.
+    # Returns underlying block.
     #
     def to_proc
-      if value = @value
-        lambda{ value }
-      else
-        block = @block
-        lambda do |*args|
-          instance_exec(*args, &block)
-        end
-      end
+      block
     end
 
-    #
-    # Return the value or procedure in the form of a Hash.
-    #
-    # @return [Hash]
-    #
-    def to_h
-      (@value || HashBuilder.new(&@block)).to_h
-    end
-
-    #
-    # Return the value or procedure in the form of a String.
-    #
-    # @return [String]
-    #
-    def to_s
-      (@value || call).to_s
-    end
-
-    #
-    # Alias for #to_s.
-    #
-    # @todo Should this alias be deprecated?
-    #
-    alias text to_s
+    ##
+    ## Convert block into a Hash.
+    ##
+    ## @return [Hash]
+    ##
+    #def to_h
+    #  (@value || HashBuilder.new(&@block)).to_h
+    #end
 
     #
     # Copy the configuration with alterations.
@@ -159,11 +107,34 @@ module Confection
     end
 
     #
-    # Ruby 1.9 defines #inspect as #to_s, ugh.
     #
-    def inspect
-      "#<#{self.class.name}:#{object_id} @tool=%s @profile=%s>" % [tool.inspect, profile.inspect]
+    #
+    def match?(tool, profile)
+      return false unless self.tool    == tool.to_sym
+      return false unless self.profile == profile.to_sym
+      return true
     end
+
+    #
+    #
+    #
+    def tool?(tool)
+      self.tool == tool.to_sym
+    end
+
+    #
+    #
+    #
+    def profile?(profile)
+      self.profile == profile.to_sym
+    end
+
+    ##
+    ## Ruby 1.9 defines #inspect as #to_s, ugh.
+    ##
+    #def inspect
+    #  "#<#{self.class.name}:#{object_id} @tool=%s @profile=%s>" % [tool.inspect, profile.inspect]
+    #end
 
   end
 

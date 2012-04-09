@@ -38,7 +38,7 @@ end
 # Use `$properties.coverage_folder` to set directory in which to store
 # coverage report this defaults to `log/coverage`.
 #
-config :qed/:cov do
+config :qed, :cov do
   require 'simplecov'
 
   dir = $properties.coverage_folder
