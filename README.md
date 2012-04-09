@@ -114,7 +114,7 @@ and there exists some means of configuring the tool via a toplevel/global
 interface, or the tool has been customized to directly support RC.
 
 
-## Customization (WORK IN PROGRESS)
+## Customization
 
 A tool can provide dedicated support for RC by loading the `rc/interface` script
 and defining a `run` procedure. For example, the `detroit` project defines:
