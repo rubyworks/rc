@@ -43,7 +43,7 @@ title: RC
 revision: 0
 created: '2011-11-06'
 summary: Multi-tenant configuration for Ruby.
-version: 0.1.0
+version: 0.1.1
 description: ! "RC is a multi-tenant configuration system for Ruby projects.\nIt is
   a spin-off of the original Confection project with\na simplifed overall design and
   the ability to work with \nalmost any Ruby-based command line tool."
