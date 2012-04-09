@@ -7,6 +7,14 @@ module Kernel
     raise LoadError, "no such file -- #{feature}" unless file
     instance_eval(::File.read(file), file) if file
   end
+
+  #
+  # Evaluate script directly into current scope.
+  #
+  def import_relative(file)
+    raise LoadError, "no such file -- #{file}" unless File.file?(file)
+    instance_eval(::File.read(file), file) if file
+  end
 end
 
 class Hash
