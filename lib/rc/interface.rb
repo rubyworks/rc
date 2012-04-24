@@ -8,7 +8,6 @@ module RC
   require 'rc/config'
   require 'rc/configuration'
   #require 'rc/config_filter'
-  #require 'rc/tool_config'
   require 'rc/properties'
 
   # The Interface module extends RC module.
