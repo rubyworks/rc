@@ -1,6 +1,5 @@
 # RC - Ruby Confection
-
-## Runtime Configuration Management
+*Runtime Configuration Management*
 
 [Homepage](http://rubyworks.github.com/rc) /
 [Source Code](http://github.com/rubyworks/rc) /
