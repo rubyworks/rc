@@ -1,4 +1,5 @@
 # RC - Runtime Configuration
+a.k.a Ruby Confection
 
 [Homepage](http://rubyworks.github.com/rc) /
 [Source Code](http://github.com/rubyworks/rc) /

@@ -2,12 +2,14 @@
 .ruby
 .yardopts
 lib/c.rb
+lib/rc/api.rb
 lib/rc/config.rb
+lib/rc/config_filter.rb
 lib/rc/configuration.rb
 lib/rc/core_ext.rb
 lib/rc/interface.rb
 lib/rc/properties.rb
-lib/rc/tool_configuration.rb
+lib/rc/tool_config.rb
 lib/rc/tweaks/rake.rb
 lib/rc.rb
 spec/00_concept.md

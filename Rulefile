@@ -4,12 +4,27 @@ ignore 'work', '.yardoc', 'doc', 'log', 'pkg', 'tmp', 'web'
 
 desc "run specs"
 task "spec" do
-  cmd = "qed"
-  sh cmd
+  sh 'qed'
 end
 
-task "spec:cov" do
-  cmd = "qed -p cov"
-  sh cmd
+# NOTE: We can't use the qed simplecov profile in the `Config.rb`
+# file b/c QED uses RC and SimpleCov must be loaded before the
+# code it covers. So we handle here by hand instead.
+desc "verify specifications with coverage report"
+task 'spec:cov' do
+  require 'simplecov'
+  SimpleCov.start do
+    coverage_dir 'log/coverage'
+  end
+  require 'qed/cli'
+  QED::Session.cli
+end
+
+file 'var/*' do
+  sh 'dotruby source var'
+end
+
+file 'qed/**/*' do
+  sh 'qed'
 end
 

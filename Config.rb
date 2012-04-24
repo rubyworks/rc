@@ -1,5 +1,10 @@
 #!/usr/bin/env ruby
 
+config :pry do
+  puts "RC on Pry!"
+  $LOAD_PATH.unshift('lib')
+end
+
 #
 # Detroit assembly.
 #
@@ -47,6 +52,9 @@ config :qed, :cov do
     coverage_dir(dir || 'log/coverage')
     #add_group "Label", "lib/qed/directory"
   end
+end
+
+config :qed do
 end
 
 #
