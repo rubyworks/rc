@@ -1,5 +1,6 @@
-# RC - Runtime Configuration
-a.k.a Ruby Confection
+# RC - Ruby Confection
+
+## Runtime Configuration Management
 
 [Homepage](http://rubyworks.github.com/rc) /
 [Source Code](http://github.com/rubyworks/rc) /
@@ -112,38 +113,34 @@ the tool at hand. Consult the tool's documentation for details.
 RC can be used with any Ruby-based commandline tool that can be required by
 the same name as the tool, e.g. `rake` can be required via `require 'rake'`,
 and there exists some means of configuring the tool via a toplevel/global
-interface, or the tool has been customized to directly support RC.
+interface, or the tool has been desinged to directly support RC.
 
 
 ## Customization
 
-A tool can provide dedicated support for RC by loading the `rc/interface` script
-and defining a `run` procedure. For example, the `detroit` project defines:
+A tool can provide dedicated support for RC by loading the `rc/api` script
+and defining a `config_proc` procedure. For example, the `detroit` project
+defines:
 
-    require 'rc/interface'
+    require 'rc/api'
 
-    RC.run('detroit') do |configs|
-      Detroit.rc_configs = configs
+    RC.config_proc('detroit') do |config|
+      Detroit.rc_config << config
     end
 
 When `detroit` gets around to loading a project's build assemblies, it will
-check this setting and evaluate the configs via Detroit's confgiruation DSL.
+check `rc_config` setting and evaluate the configurations via Detroit's own
+DSL.
 
-Some tools may also need to run preconfiguration code before allowing RC to
-process configuration. Probably the most common use for this is to parse
-commandline arguments for a profile setting as an alternative to normal
-environment variable.
+Some tools will want to support a command line option for selecting a 
+configuration profile. RC has a convenience method to make this very
+easy to do.
 
-    RC.run('qed') do
-      if i = ARGV.index('--profile') || ARGV.index('-p')
-        ENV['profile'] = ARGV[i+1]
-      end
-    end
+    RC.profile_switch('-p', '--profile')
 
-The `run` method forces the loading of `rc`, which triggers tool configuration,
-regardless of whether the end-user has set `RUBYOPT="-rc"`. If you wish for your
-tool to only work when `RUBYOPT` is set, then define `RC.processor` instead of
-`run`.
+It does not remove the argument from `ARGV`, so the tool's command line option
+parser should still account for it. This simply ensures RC will know what the
+profile is by setting `ENV['profile']` to that given in `ARGV`.
 
 
 ## Dependencies
