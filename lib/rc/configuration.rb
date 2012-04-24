@@ -1,8 +1,14 @@
 module RC
 
-  # Configuration
+  # The Configuration class encapsulates a project/library's tool 
+  # configuration.
   #
   class Configuration < Module
+
+    #
+    # Configuration is Enumerable.
+    #
+    include Enumerable
 
     #
     # Configuration file pattern. The standard configuration file name is
@@ -13,17 +19,25 @@ module RC
     #
     # Config files looked for in the order or precedence:
     #
-    #   * `.config.rb`
-    #   * `Config.rb`
-    #   * `config.rb`
+    #   * `.config.rb` or `.confile.rb`
+    #   * `Config.rb`  or `Confile.rb`
+    #   * `config.rb`  or `confile.rb`
     #
-    CONFIG_FILE = '{.c,C,c}onfig{.rb,}'
+    # The `.rb` suffix is optional for `confile` variations, but recommended.
+    # It is not optional for `config` b/c very old version of setup.rb script
+    # still in use by some projects use `.config` for it's own purposes.
+    #
+    # TODO: Yes, there are really too many choices for config file name, but
+    # we haven't been able to settle on a smaller list just yet. Please come
+    # argue with us about what's best.
+    #
+    CONFIG_FILE = '{.c,C,c}onfi{g.rb,le.rb,le}'
 
     #
     # When looking up config file, it one of these is found
     # then there is no point to looking further.
     #
-    ROOT_INDICATORS = %w{.git .hg _darcs} #.ruby
+    ROOT_INDICATORS = %w{.git .hg _darcs .ruby}
 
     #
     # Load configuration file from local project or other gem.
@@ -51,12 +65,12 @@ module RC
     def initialize(file=nil)
       @file = file
 
-      @_list  = []
+      @_store = []
       @_state = {}
 
       # TODO: does this rescue make sense here?
       begin
-        import_relative(@file) if @file
+        instance_eval(File.read(file), file) if file      
       rescue => e
         raise e if $DEBUG
         warn e.message
@@ -69,9 +83,10 @@ module RC
     # @param [String,Symbol] name
     #   A profile name.
     #
-    def profile(name, &block)
+    def profile(name, state={}, &block)
       raise SyntaxError, "nested profile sections" if @_state[:profile]
       original_state = @_state.dup
+      @_state.update(state)
       @_state[:profile] = name.to_s
       instance_eval(&block)
       @_state = original_state
@@ -93,8 +108,6 @@ module RC
     #   profile :coverage do
     #     config :qed, :from=>'qed'
     #   end
-    #
-    # @todo Clean this code up.
     #
     def config(tool, *args, &block)
       options = (Hash===args.last ? args.pop : {})
@@ -118,55 +131,76 @@ module RC
         end
       end
 
-      from = options[:from]
-
       raise ArgumentError, "too many arguments"      if args.first
       raise SyntaxError,   "nested profile sections" if profile && @_state[:profile]
-      #raise ArgumentError, "use block or :from  setting" if options[:from]  && block
 
       profile = @_state[:profile] unless profile
+
+      # TODO: other options such as :file and/or :load ?
+
+      from = options[:from]
 
       if from
         from_config  = RC.configuration(from)
         from_tool    = options[:tool]    || tool
         from_profile = options[:profile] || profile
+        from_options = options.merge(:tool=>tool, :profile=>profile)
+
         from_config.each do |c|
           if c.match?(from_tool, from_profile)
-            @_list << Config.new(tool, profile, &c)
+            @_store << c.copy(from_options)
           end
         end
 
         return unless block
       end
 
-      @_list << Config.new(tool, profile, &block)
+      config = Config.new(tool, profile, options, &block)
+
+      @_store << config
     end
 
     #
-    # @return [Hash] Defined configurations.
+    # Iterate over each config.
     #
-    def configurations
-      @_list
-    end
-
-    #
-    # @return [ToolConfiguration] Subset of Configuration.
-    #
-    def [](tool)
-      ToolConfiguration.new(tool, self)
-    end
-
-    # Configuration is Enumerable.
-    include Enumerable
-
-    # 
     def each(&block)
-      @_list.each(&block)
+      @_store.each(&block)
     end
 
+    #
+    # The number of configs.
     #
     def size
-      @_list.size
+      @_store.size
+    end
+
+    #
+    # Get a list of the defined configurations. The list is a duplication
+    # of the underlying list so it can't be easily tampered.
+    #
+    # @return [Array] List of defined configurations.
+    #
+    def to_a
+      @_store.dup
+    end
+
+    #
+    alias :configurations, :to_a
+
+    #
+    # Get a list of defined profiles names for the given +tool+.
+    # use the current tool if no +tool+ is given.
+    #
+    def profile_names(tool=nil)
+      tool = tool || RC.current_tool
+
+      list = []
+      each do |c|
+        if c.tool?(tool)
+          list << c.profile
+        end
+      end
+      list.uniq
     end
 
   private

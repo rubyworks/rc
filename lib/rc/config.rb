@@ -9,10 +9,25 @@ module RC
     # Initialize Config instance. Config instances are per-configuration,
     # which means they are associated with one and only one config entry.
     #
-    def initialize(tool, profile, &block)
+    # @param [#to_sym] tool
+    #   The tool's name.
+    #
+    # @param [#to_sym,nil] profile
+    #   Profile name, or +nil+.
+    #
+    # @param [Hash] properties
+    #   Any additional properties associated with the config entry.
+    #
+    def initialize(tool, profile, properties={}, &block)
+      @properties = {}
+
       self.tool    = tool
-      self.profile = profile
+      self.profile = profile || :default
       self.block   = block
+
+      properties.each do |k, v|
+        @properties[k.to_sym] = v || false
+      end
     end
 
     #
@@ -24,6 +39,9 @@ module RC
     # Change the tool name. Note, this will rarely be used since,
     # generally speaking, configurations tend to be very tool
     # specific.
+    #
+    # @param [#to_sym] name
+    #   The tool's name.
     #
     def tool=(name)
       @tool = name.to_sym
@@ -37,8 +55,11 @@ module RC
     #
     # Change the profile name.
     #
+    # @param [#to_sym,nil] name
+    #   Profile name, or +nil+.
+    #
     def profile=(name)
-      @profile = name.to_sym if name
+      @profile = (name || :default).to_sym
     end
 
     #
@@ -55,7 +76,14 @@ module RC
     #   The configuration procedure.
     #
     def block=(block)
-      @block = block.to_proc
+      @block = block #.to_proc
+    end
+
+    #
+    #
+    #
+    def preset?
+      @properties[:preset]
     end
 
     #
@@ -87,7 +115,7 @@ module RC
     ## @return [Hash]
     ##
     #def to_h
-    #  (@value || HashBuilder.new(&@block)).to_h
+    #  HashBuilder.new(&self)).to_h
     #end
 
     #
@@ -107,17 +135,45 @@ module RC
     end
 
     #
+    # Match config properties against given criteria.
     #
+    # @return [Boolean]
     #
-    def match?(tool, profile)
-      tool    = tool.to_sym
-      profile = profile.to_sym if profile
+    def match_critera?(criteria={})
+      criteria = criteria.dup
 
-      self.tool == tool && self.profile == profile
+      tool    = criteria.delete(:tool)
+      profile = criteria.delete(:profile)
+
+      return false if tool    && tool.to_sym    != self.tool
+      return false if profile && profile.to_sym != self.profile
+
+      criteria.each do |k,v|
+        return false unless @properties[k.to_sym] == v
+      end
+
+      return true
+    end
+
+    #
+    # Match config against tool and/or profile names.
+    #
+    # @return [Boolean]
+    #
+    def match?(tool, profile=nil)
+      tool = tool.to_sym
+      if profile
+        profile = profile.to_sym
+        self.tool == tool && self.profile == profile
+      else
+        self.tool == tool
+      end
     end
 
     #
     # Does the given `tool` match the config's tool?
+    #
+    # @return [Boolean]
     #
     def tool?(tool)
       self.tool == tool.to_sym
@@ -126,8 +182,10 @@ module RC
     #
     # Does the given `profile` match the config's profile?
     #
+    # @return [Boolean]
+    #
     def profile?(profile)
-      self.profile == profile.to_sym
+      self.profile == (profile || :default).to_sym
     end
 
     ##
