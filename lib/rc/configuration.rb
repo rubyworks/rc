@@ -65,7 +65,7 @@ module RC
     def initialize(file=nil)
       @file = file
 
-      @_store = []
+      @_store = Hash.new{ |h,k| h[k]=[] }
       @_state = {}
 
       # TODO: does this rescue make sense here?
@@ -96,13 +96,19 @@ module RC
     # Configure a tool.
     #
     # @param [Symbol] tool
-    #   The name of the tool to configure.
+    #   The name of the command or feature to configure.
     #
     # @param [Hash] opts
     #   Configuration options.
     #
+    # @options opts [String] :command
+    #   Name of command, or false if not a command configuration.
+    #
+    # @options opts [String] :feature
+    #   Alternate require if differnt than command name.
+    #
     # @options opts [String] :from
-    #   Library from which to extract configuration.
+    #   Library from which to import configuration.
     #
     # @example
     #   profile :coverage do
@@ -112,16 +118,15 @@ module RC
     def config(tool, *args, &block)
       options = (Hash===args.last ? args.pop : {})
 
-      # @todo Might we have an option to lockdown tool 
-      #       So that we do without ToolConfiguration?
-
       case args.first
       when Symbol
         profile = args.shift
       when String
         profile = args.shift unless args.first.index("\n")
       end
+      profile = options[:profile] unless profile
 
+      # TODO: not sure if this YAML feature is worth the additonal code
       data = args.shift
       raise ArgumentError, "must use data or block, not both" if data && block
       if data
@@ -136,72 +141,115 @@ module RC
 
       profile = @_state[:profile] unless profile
 
-      # TODO: other options such as :file and/or :load ?
+      options[:feature] = tool.to_s unless options.key?(:feature)
+      options[:command] = tool.to_s unless options.key?(:command)
+      options[:profile] = (profile || 'default').to_s
 
+      feature = options[:feature].to_s
+
+      # TODO: other import options such as local file?
       from = options[:from]
 
       if from
-        from_config  = RC.configuration(from)
-        from_tool    = options[:tool]    || tool
-        from_profile = options[:profile] || profile
-        from_options = options.merge(:tool=>tool, :profile=>profile)
+        if Array === from
+          from_name, from_opts = *from
+        else
+          from_name, from_opts = from, {}
+        end
 
-        from_config.each do |c|
-          if c.match?(from_tool, from_profile)
-            @_store << c.copy(from_options)
+        from_config = RC.configuration(from_name)
+
+        from_opts[:feature] = options[:feature] unless from_opts.key?(:feature) if options[:feature]
+        from_opts[:command] = options[:command] unless from_opts.key?(:command) if options[:command]
+        from_opts[:profile] = options[:profile] unless from_opts.key?(:profile) if options[:profile]
+
+        from_opts[:feature] = from_opts[:feature].to_s if from_opts[:feature]
+        from_opts[:command] = from_opts[:command].to_s if from_opts[:command]
+        from_opts[:profile] = from_opts[:profile].to_s if from_opts[:profile]
+
+        from_config.each do |ftr, confs|
+          confs.each_with_index do |c, i|
+            if c.match?(from_opts)
+              @_store[feature] << c.copy(options)
+            end
           end
         end
 
         return unless block
       end
 
-      config = Config.new(tool, profile, options, &block)
+      config = Config.new(feature, options, &block)
 
-      @_store << config
+      @_store[feature] << config
     end
 
     #
-    # Iterate over each config.
+    #
+    #
+    def [](feature)
+      @_store[feature.to_s]
+    end
+
+    #
+    # Iterate over each feature config.
+    #
+    # @example
+    #   confgiuration.each do |feature, configs|
+    #     configs.each do |config|
+    #       ...
+    #     end
+    #   end
     #
     def each(&block)
       @_store.each(&block)
     end
 
     #
-    # The number of configs.
+    # The number of feature configs.
     #
     def size
       @_store.size
     end
 
     #
-    # Get a list of the defined configurations. The list is a duplication
-    # of the underlying list so it can't be easily tampered.
+    # Get a list of the defined configurations.
     #
-    # @return [Array] List of defined configurations.
+    # @return [Array] List of all defined configurations.
     #
     def to_a
-      @_store.dup
+      list = []
+      @_store.each do |feature, configs|
+        list.concat(configs)
+      end
+      list
     end
 
     #
-    alias :configurations, :to_a
+    # @deprecated
+    #
+    alias :configurations :to_a
 
     #
-    # Get a list of defined profiles names for the given +tool+.
-    # use the current tool if no +tool+ is given.
+    # Get a list of defined profiles names for the given +command+.
+    # use the current command if no +command+ is given.
     #
-    def profile_names(tool=nil)
-      tool = tool || RC.current_tool
+    def profile_names(command=nil)
+      command = command || RC.current_command
 
       list = []
-      each do |c|
-        if c.tool?(tool)
-          list << c.profile
+      @_store.each do |feature, configs|
+        configs.each do |c|
+          if c.command?(command)
+            list << c.profile
+          end
         end
       end
       list.uniq
     end
+
+    #def inspect
+    #  "#<RC::Configuration:#{object_id} @file=#{@file}>"
+    #end
 
   private
 

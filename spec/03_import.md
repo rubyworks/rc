@@ -9,27 +9,28 @@ using the `:from` option.
 
     rc.config :qed, :profile=>'example', :from=>'qed'
 
-    rc.size.assert == 1
+    rc.to_a.size.assert == 1
 
 The configuration can also be imported from a different profile.
 
-    rc.config :qed, :coverage, :from=>'qed', :profile=>:simplecov
+    rc.config :qed, :coverage, :from=>['qed', :profile=>:simplecov]
 
-    rc.size.assert == 2
+    rc.to_a.size.assert == 2
 
-Although it will rarely be useful, it may also be imported from another tool.
+Although it will rarely be of use, it may also be imported from another
+feature or commandline tool.
 
-    rc.config :example, :from=>'qed', :tool=>:sample
+    rc.config :example, :from=>['qed', :command=>:sample]
 
 Imported configurations can also be augmented via a block.
 
     rc = RC::Configuration.new
 
-    rc.config :qed, :from=>'qed', :profile=>:simplecov do
+    rc.config :qed, :from=>['qed', :profile=>:simplecov] do
       # additional code here
     end
 
-    rc.size.assert == 2
+    rc.to_a.size.assert == 2
 
 Technically this last form just creates two configurations for the same
 tool and profile, but the ultimate effect is the same.

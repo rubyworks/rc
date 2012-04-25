@@ -14,7 +14,7 @@ Let's say we have a configuration file `config.rb` containing:
     end
 
 To get the configuration of the current project --relative to the 
-current working directory, we can use the `configuration` method.
+current working directory, use the `configuration` method.
 
     RC.configuration
 
@@ -23,14 +23,17 @@ had via the `properties` method.
 
     RC.properties
 
-The profile names can be looked up for any given tool via the `profiles`
+The profile names can be looked up for any given tool via the `profile_names`
 method.
 
-    RC.profiles(:example)
+    RC.profile_names(:example)  #=> ['default', 'something']
 
-The number of configurations in the current project can be had via
-the `size` method. (This is the number of configurations we have
-defined in our test fixture.)
+The number of feature configurations in the current project can be
+had via the `size` method.
 
-    RC.configuration.configurations.size.assert == 2
+    RC.configuration.size  #=> 1
+
+A list of all configuration entries can be had by calling #to_a.
+
+    RC.configuration.to_a.size  #=> 2
 

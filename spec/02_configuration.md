@@ -16,8 +16,8 @@ demonstration.
 Evaluation of a configuration file, populate the Confection.config instance.
 
     sample = rc.configurations.last
-    sample.tool     #=> :sample1
-    sample.profile  #=> nil
+    sample.tool     #=> 'sample1'
+    sample.profile  #=> 'default'
     sample.class    #=> RC::Config
 
 A profile can be used as a means fo defining multiple configurations
@@ -31,8 +31,8 @@ a Symbol.
     HERE
 
     sample = rc.configurations.last
-    sample.tool     #=> :sample2
-    sample.profile  #=> :opt1
+    sample.tool     #=> 'sample2'
+    sample.profile  #=> 'opt1'
 
 Or it can be done by using a `profile` block.
 
@@ -45,8 +45,8 @@ Or it can be done by using a `profile` block.
     HERE
 
     sample = rc.configurations.last
-    sample.tool     #=> :sample2
-    sample.profile  #=> :opt1
+    sample.tool     #=> 'sample2'
+    sample.profile  #=> 'opt1'
 
 RC also support YAML-based configuration, if the last argument is
 a multi-line string it will create a block using `YAML.load`.
@@ -59,7 +59,7 @@ a multi-line string it will create a block using `YAML.load`.
     HERE
 
     sample = rc.configurations.last
-    sample.tool        #=> :sample3
-    sample.profile     #=> nil
+    sample.tool        #=> 'sample3'
+    sample.profile     #=> 'default'
     sample.call.assert == {'note'=>'This is the note.'}
 

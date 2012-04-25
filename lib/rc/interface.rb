@@ -9,6 +9,7 @@ module RC
   require 'rc/configuration'
   #require 'rc/config_filter'
   require 'rc/properties'
+  require 'rc/setup'
 
   # The Interface module extends RC module.
   #
@@ -20,25 +21,30 @@ module RC
   #
   #   require 'rc/api'
   #
-  #   RC.config_proc(:rspec) do |config|
+  #   RC.setup('rspec') do |tool|
   #     # configuration of current profile
-  #     RSpec.configure(&config)
+  #     tool.config_proc do |config|
+  #       RSpec.configure(&config)
+  #     end
   #   end
   #
   # Or
   #
   #   require 'rc/api'
   #
-  #   RC.config_proc(:qed) do |profile, config|
+  #   RC.setup('qed') do |tool|
   #     # configuration of each profile
-  #     QED.profile(profile, &config)
+  #     tool.config_proc do |profile, config|
+  #       QED.profile(profile, &config)
+  #     end
   #   end
   #
-  # This lets RC how to handle configuration of respective tool.
+  # This lets RC know how to handle configuration of the respective tool.
   #
-  # Then, just before the tool is ready to execute,
+  # Then, to process the configuration, just before the tool is ready to execute,
+  # call the `commit_configuruation` method.
   #
-  #   RC.configure!
+  #   RC.commit_configuration
   #
   # It's important to not call `RC.configure!` in "load space". That is
   # to say, do not call it in code that is run when loading a library.
@@ -123,15 +129,18 @@ module RC
       tool = tool || current_tool
       gem  = opts[:from]
 
-      configuration(gem).profile_name(tool)
+      configuration(gem).profile_names(tool)
     end
 
     #
     # Get current tool.
     #
+    # @todo Not so sure `ENV['tool']` is a good idea.
+    #
     def current_tool
       File.basename(ENV['tool'] || $0)
     end
+    alias current_command current_tool
 
     #
     # Set current tool.
@@ -139,12 +148,13 @@ module RC
     def current_tool=(tool)
       ENV['tool'] = tool.to_s
     end
+    alias current_command= current_tool=
 
     #
     # Get current profile.
     #
     def current_profile
-      ENV['profile'] || 'default'
+      ENV['profile'] || ENV['p'] || 'default'
     end
 
     #
@@ -158,12 +168,8 @@ module RC
       end
     end
 
-    #
-    #
-    #
-    #def current_config
-    #  ConfigFilter.new(configuration, :tool=>current_tool, :profile=>current_profile)
-    #end
+    # TODO: Maybe properties should comf Configuration class and be per-gem.
+    #       I don't see a use for imported properties, but just in case.
 
     #
     # Properties of the current project. These can be used in a project's config file
@@ -177,157 +183,101 @@ module RC
     end
 
     #
-    # Set current profile via ARGV switch.
+    # Specialize feature's configuration setup.
     #
-    # @example
-    #   profile_switch('-p', '--profile')
-    #
-    def profile_switch(*switches)
-      switches.each do |switch|
-        if index = ARGV.index(switch)
-          self.current_profile = ARGV[index+1]
-        end
-      end
+    def setup(tool, &block)
+      @setup ||= {}
+      @setup[tool.to_s] = Setup.new(tool, &block) if block
+      @setup[tool.to_s]
     end
 
     #
-    # Get/set current configuration callback. Tools can use
-    # this to gain control over the configuration proccess.
+    # Tool's will use this method to process RC configuration.
     #
-    # The block should take a single argument for a Config
-    # object. Keep in mind this procedure can be called multiple
-    # times.
-    #
-    # This might be used to save the configuration for
-    # a later execution, or to evaluate the configuration
-    # in a special scope, or both.
-    #
-    # Keep in mind that if configurations are evaluated in
-    # a different scope, they may not be able to utilize
-    # any shared methods defined in the config file.
-    #
-    # @example
-    #   RC.current_proc('foo') do |config|
-    #     config.call
-    #   end
-    #
-    def current_proc(tool, &block)
-      @current_proc ||= {}
-      @current_proc[tool.to_s] = block if block
-      @current_proc[tool.to_s]
-    end
-
-    #
-    # Get/set per-profile configuration callback. Tools can use
-    # this to gain control over the configuration proccess.
-    #
-    # @example
-    #   RC.profile_proc('qed') do |name, config|
-    #     QED.configure(name, &config)
-    #   end
-    #
-    def profile_proc(tool, &block)
-      @profile_proc ||= {}
-      @profile_proc[tool.to_s] = block if block
-      @profile_proc[tool.to_s]
-    end
-
-    #
-    # Define configuration callback procedure(s). This is a convenience method for
-    # the other two callback procedures, namely #current_proc and #profile_proc.
-    # If the block given has an arity of `1`, then #current_proc is set. Otherwise
-    # the #profile_proc is set and #current_proc is set to a no-op. These two modes
-    # fit typical usage, which is why this convenience method is provided.
-    #
-    def config_proc(tool, options={}, &block)
-      properties  # prime global properties
-
-      if block
-        if block.arity == 1
-          current_proc(tool, &block)
-        else
-          profile_proc(tool, &block)
-          current_proc(tool){}  # no current_proc in this case
-        end
-      else
-        raise ArgumentError, "no block given"
-      end
-
-      require 'rc' # now bootstrap
-    end
-
-    #
-    # Alias for #config_proc. This is the original name, so we
-    # keep it for compatibility.
-    #
-    alias :setup, :config_proc
-
-    #
-    # Tools use this method to initialize the RC configuration
-    # bootstrap.
-    #
-    def configure!
+    def commit_configuration
       require 'rc' #bootstrap ?
     end
 
   private
 
     #
-    # Start RC automatically.
+    # Activate RC configuration.
     #
     def bootstrap
       @bootstrap ||= (
         properties  # prime global properties
 
-        # FIXME: It is not possible for the tool to use #profile_switch
-        # first, so it may not be possible to have preconfigurations.
-        #preconfigure
-
         tweak = File.join(TWEAKS_DIR, current_tool + '.rb')
         if File.exist?(tweak)
           require tweak
-        else
-          begin
-            require current_tool
-          rescue LoadError
-            #warn ""
-          end
+          # FIXME: invoke config
+        #else
+        #  begin
+        #    require current_tool
+        #  rescue LoadError
+        #    #warn ""
+        #  end
         end
 
-        cc = RC.current_proc(current_tool)
-        configuration.each do |config|
-          if pc = RC.profile_proc(config.tool)
-            pc.call(config.profile, config)
-          end
-          if config.match?(current_tool, current_profile)
-            cc ? cc.call(config) : config.call
-          end
-        end
+        bootstrap_require
+
+        #setup = RC.setup(current_tool)
+
+        #configuration.each do |config|
+        #  next unless config.tool?(current_tool)
+
+        #  if setup
+        #    setup.profile_proc.each do |c|
+        #      c.call(config.profile, config)
+        #    end
+        #    if config.profile?(current_profile)
+        #      setup.current_proc.each do |c|
+        #        c.call(config)
+        #      end
+        #    end
+        #  else
+        #    config.call
+        #  end
+        #end
 
         true
       )
     end
 
-    #
-    # Setup configuration.
-    #
-    def preconfigure(options={})
-      tool    = options[:tool]    || current_tool
-      profile = options[:profile] || current_profile
+    def bootstrap_require
+      Kernel.module_eval do
+        alias_method :require_without_rc, :require
 
-      preconfiguration.each do |c|
-        c.call if c.match?(tool, profile)
+        def require(feature)
+          require_without_rc(feature)
+
+          RC.configuration[feature].each do |config|
+            config.configure(feature)
+          end
+        end
       end
     end
 
+    ##
+    ## Setup configuration.
+    ##
+    #def preconfigure(options={})
+    #  tool    = options[:tool]    || current_tool
+    #  profile = options[:profile] || current_profile
     #
-    #
-    #
-    def parse_arguments(*args)
-      options  = Hash === args.last ? args.pop : {}
-      argument = args.shift
-      return argument, options
-    end
+    #  preconfiguration.each do |c|
+    #    c.call if c.match?(tool, profile)
+    #  end
+    #end
+
+    ##
+    ##
+    ##
+    #def parse_arguments(*args)
+    #  options  = Hash === args.last ? args.pop : {}
+    #  argument = args.shift
+    #  return argument, options
+    #end
 
   end
 

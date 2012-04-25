@@ -16,7 +16,7 @@ module RC
       @list = []
 
       configuration.each do |c|
-        @list << c if c.match_critera?(criteria)
+        @list << c if c.match?(criteria)
       end
     end   
 

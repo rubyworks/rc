@@ -18,22 +18,65 @@ module RC
     # @param [Hash] properties
     #   Any additional properties associated with the config entry.
     #
-    def initialize(tool, profile, properties={}, &block)
-      @properties = {}
+    def initialize(tool, properties={}, &block)
+      @property = {:profile=>:default}
 
-      self.tool    = tool
-      self.profile = profile || :default
-      self.block   = block
+      @property[:command] = tool.to_s
+      @property[:feature] = tool.to_s
+
+      @block = block
 
       properties.each do |k, v|
-        @properties[k.to_sym] = v || false
+        property(k,v)
       end
     end
 
     #
+    # Get/set property.
+    #
+    def property(name, value=ArgumentError)
+      name = name.to_sym
+
+      return @property[name] if value == ArgumentError
+
+      case name
+      when :feature, :command, :profile
+        @property[name] = value.to_s
+      else
+        @property[name] = value
+      end
+    end
+
+    #
+    # The name of feature being configured.
+    #
+    def feature
+      @property[:feature]
+    end
+
+    #
+    # Change the feature name. Note, this will rarely be used since,
+    # generally speaking, configurations tend to be very tool
+    # specific.
+    #
+    # @param [#to_sym] name
+    #   The tool's name.
+    #
+#    def feature=(name)
+#      @properties[:feature] = name.to_sym
+#    end
+
+    #
     # The name of tool being configured.
     #
-    attr :tool
+    def command
+      @property[:command]
+    end
+
+    #
+    # @todo Deprecate?
+    #
+    alias :tool :command
 
     #
     # Change the tool name. Note, this will rarely be used since,
@@ -43,14 +86,16 @@ module RC
     # @param [#to_sym] name
     #   The tool's name.
     #
-    def tool=(name)
-      @tool = name.to_sym
-    end
+#    def command=(name)
+#      @comman = name.to_sym
+#    end
 
     #
     # The name of the profile to which this configuration belongs.
     #
-    attr :profile
+    def profile
+      @property[:profile]
+    end
 
     #
     # Change the profile name.
@@ -58,8 +103,16 @@ module RC
     # @param [#to_sym,nil] name
     #   Profile name, or +nil+.
     #
-    def profile=(name)
-      @profile = (name || :default).to_sym
+#    def profile=(name)
+#      @profile = (name || :default).to_sym
+#    end
+
+    #
+    # The library from which this configuration derives.
+    # This is a shortcut for `property(:from)`.
+    #
+    def from
+      @property[:from]
     end
 
     #
@@ -75,16 +128,16 @@ module RC
     # @param [Proc] procedure
     #   The configuration procedure.
     #
-    def block=(block)
-      @block = block #.to_proc
-    end
+#    def block=(block)
+#      @block = block #.to_proc
+#    end
 
     #
     #
     #
-    def preset?
-      @properties[:preset]
-    end
+    #def preset?
+    #  @property[:preset]
+    #end
 
     #
     # The arity of the configuration procedure.
@@ -99,7 +152,7 @@ module RC
     # Call the configuration procedure.
     #
     def call(*args)
-      block.call(*args)
+      block.call(*args) if block
     end
 
     #
@@ -127,32 +180,12 @@ module RC
     # @return [Config] copied config
     #
     def copy(alt={})
-      copy = dup
+      tool = @property[:feature] || @property[:command]
+      copy = self.class.new(tool, @property.dup, &@block)
       alt.each do |k,v|
-        copy.__send__("#{k}=", v)
+        copy.property(k, v)
       end
       copy
-    end
-
-    #
-    # Match config properties against given criteria.
-    #
-    # @return [Boolean]
-    #
-    def match_critera?(criteria={})
-      criteria = criteria.dup
-
-      tool    = criteria.delete(:tool)
-      profile = criteria.delete(:profile)
-
-      return false if tool    && tool.to_sym    != self.tool
-      return false if profile && profile.to_sym != self.profile
-
-      criteria.each do |k,v|
-        return false unless @properties[k.to_sym] == v
-      end
-
-      return true
     end
 
     #
@@ -160,23 +193,41 @@ module RC
     #
     # @return [Boolean]
     #
-    def match?(tool, profile=nil)
-      tool = tool.to_sym
-      if profile
-        profile = profile.to_sym
-        self.tool == tool && self.profile == profile
-      else
-        self.tool == tool
+    def match?(*args)
+      props = Hash === args.last ? args.pop : {}
+
+      if tool = args.shift
+        props[:command] = tool.to_s
+        props[:feature] = tool.to_s
       end
+
+      if props[:profile]
+        props[:profile] = (props[:profile] || :default).to_s
+      end
+
+      props.each do |k,v|
+        return false unless property(k) == v
+      end
+
+      return true
     end
 
     #
-    # Does the given `tool` match the config's tool?
+    # Does the given `feature` match the config's feature?
     #
     # @return [Boolean]
     #
-    def tool?(tool)
-      self.tool == tool.to_sym
+    def feature?(feature=RC.current_feature)
+      self.feature == feature.to_s
+    end
+
+    #
+    # Does the given `command` match the config's command?
+    #
+    # @return [Boolean]
+    #
+    def command?(command=RC.current_command)
+      self.command == command.to_s
     end
 
     #
@@ -184,8 +235,21 @@ module RC
     #
     # @return [Boolean]
     #
-    def profile?(profile)
-      self.profile == (profile || :default).to_sym
+    def profile?(profile=RC.current_profile)
+      self.profile == (profile || :default).to_s
+    end
+
+    #
+    # @todo The feature argument might not be needed.
+    #
+    def configure(feature)
+      return false if self.feature != feature 
+
+      if setup = RC.setup(feature)
+        setup.call(self)
+      else
+        block.call if command?
+      end
     end
 
     ##
