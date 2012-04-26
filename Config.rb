@@ -46,7 +46,9 @@ end
 # IMPORTANT! Unfortunately this will not give us a reliable report
 # b/c QED uses the RC gem, so SimpleCov can't differentiate the two.
 #
-config :qed, :cov do
+config 'qed', 'cov' do
+  puts "QED w/coverage!"
+
   require 'simplecov'
 
   dir = $properties.coverage_folder
@@ -57,24 +59,24 @@ config :qed, :cov do
   end
 end
 
-config :qed do
+config 'qed' do
   puts "QED!"
 end
 
 #
 # Rake tasks 
 #
-config :rake do
+config 'rake' do
   desc 'run unit tests'
-  task :test do
-    puts "boo"
+  task 'test' do
+    puts "Rake Boo!"
   end
 end
 
 #
 # Example configuration.
 #
-config :example do
+config 'example' do
   puts "Configuration Example!"
 end
 
