@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+
+# If we do this in a BlankObject context we could control it all.
+#
+# So in this case the criteria would be that there were a require `foo`
+# for a given `Foo` module, which go with a `foo` command.
+
+module NULL
+  extend self
+  def method_missing(*); self; end
+end
+
+def Object.const_missing(name)
+  cmd = $0.sub('./', '')
+  p cmd
+  if cmd == name.to_s.downcase
+    require name.to_s.downcase
+    const_get(name)
+  else
+    NULL
+  end
+end
+
+p TryThis.object_id
+
+
+QED.configure do |run|
+  run.files << 'spec'
+end
+
+Test.run do |run|
+  run.files << 'test/'
+end
+
