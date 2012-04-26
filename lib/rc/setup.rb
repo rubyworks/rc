@@ -3,20 +3,17 @@ module RC
   # Tool configuration setup is used to customize how a tool handles
   # configuration.
   #
-  # TODO: It may be useful to create "open configurations" that are run for all
-  #       tools that have a setup defined when bootstrap is run regardless
-  #       of the current tool. If we do this then `RC.commit_configuration` is
-  #       necessary. If we don't do this then `RC.commit_configuration` could
-  #       be made automatic by adding it to the end of the `RC.setup` method.
-  #
   class Setup
 
     #
     # Intialize new configuration setup.
     #
-    def initialize(feature, &block)
-      @feature = feature.to_s
-      @block   = block
+    def initialize(feature, options={}, &block)
+      @feature  = feature.to_s
+      @handlers = []
+      @swithes  = []
+
+      block.call(self)
     end
 
     #
@@ -27,19 +24,30 @@ module RC
     #
     #
     #
-    def call(config)
-      @config = config
-      @block.call(self)
+    def on(*match, &block)
+      matchers = (Hash === match.last ? match.pop : {})
+      match.each do |name|
+        case name.to_sym
+        when :command
+          matchers[:command] = RC.current_command
+        when :profile
+          matchers[:profile] = RC.current_profile
+        end
+      end
+      @handlers << [matchers, block]
     end
 
     #
-    # Delegate to config.
     #
-    # @todo Make explict methods, instead of delegating all?
     #
-    def method_missing(s, *a, &b)
-      @config.send(s, *a, &b) if @config.respond_to?(s)
+    def call(config)
+      @handlers.each do |matchers, block|
+        if config.match?(matchers)
+          block.call(config)
+        end
+      end
     end
+
 
 =begin
     #
@@ -104,28 +112,6 @@ module RC
       end
     end
 =end
-
-    #
-    # Set current profile via ARGV switch. This is done immediately,
-    # setting `ENV['profile']` to the switch value if this setup is
-    # for the current tool. The reason it is done immediately, rather
-    # than assigning it in bootstrap, is b/c option parsers somtimes
-    # consume ARGV as they parse it, and by then it would too late.
-    # If this approach proves to be an issue we could move it to
-    # bootstrap and just make a copy of ARGV here for later use.
-    #
-    # @example
-    #   profile_switch('-p', '--profile')
-    #
-    def profile_switch(*switches)
-      return unless @config.command?
-
-      switches.each do |switch|
-        if index = ARGV.index(switch)
-          ENV['profile'] = ARGV[index+1]
-        end
-      end
-    end
 
   end
 

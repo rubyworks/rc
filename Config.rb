@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-config :pry do
+config 'pry' do
   puts "RC on Pry!"
   $LOAD_PATH.unshift('lib')
 end
@@ -8,7 +8,7 @@ end
 #
 # Detroit assembly.
 #
-config :detroit do
+config 'detroit' do
   service :email do |s|
     s.mailto = ['ruby-talk@ruby-lang.org', 
                 'rubyworks-mailinglist@googlegroups.com']
@@ -43,6 +43,9 @@ end
 # Use `$properties.coverage_folder` to set directory in which to store
 # coverage report this defaults to `log/coverage`.
 #
+# IMPORTANT! Unfortunately this will not give us a reliable report
+# b/c QED uses the RC gem, so SimpleCov can't differentiate the two.
+#
 config :qed, :cov do
   require 'simplecov'
 
@@ -55,6 +58,7 @@ config :qed, :cov do
 end
 
 config :qed do
+  puts "QED!"
 end
 
 #

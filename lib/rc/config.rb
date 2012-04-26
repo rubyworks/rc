@@ -242,15 +242,15 @@ module RC
     #
     # @todo The feature argument might not be needed.
     #
-    def configure(feature)
-      return false if self.feature != feature 
-
-      if setup = RC.setup(feature)
-        setup.call(self)
-      else
-        block.call if command?
-      end
-    end
+    #def configure(feature)
+    #  return false if self.feature != feature 
+    #
+    #  if setup = RC.setup(feature)
+    #    setup.call(self)
+    #  else
+    #    block.call if command?
+    #  end
+    #end
 
     ##
     ## Ruby 1.9 defines #inspect as #to_s, ugh.

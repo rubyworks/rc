@@ -185,17 +185,46 @@ module RC
     #
     # Specialize feature's configuration setup.
     #
-    def setup(tool, &block)
+    def setup(tool, options={}, &block)
       @setup ||= {}
-      @setup[tool.to_s] = Setup.new(tool, &block) if block
+      @setup[tool.to_s] = Setup.new(tool, options, &block) if block
       @setup[tool.to_s]
     end
 
+    ##
+    ## Tool's will use this method to process RC configuration.
+    ##
+    #def commit_configuration
+    #  require 'rc' #bootstrap ?
+    #end
+
     #
-    # Tool's will use this method to process RC configuration.
+    # Set current profile via ARGV switch. This is done immediately,
+    # setting `ENV['profile']` to the switch value if this setup is
+    # for the current commandline tool. The reason it is done immediately,
+    # rather than assigning it in bootstrap, is b/c option parsers somtimes
+    # consume ARGV as they parse it, and by then it would too late.
     #
-    def commit_configuration
-      require 'rc' #bootstrap ?
+    # NOTE: If this approach proves to be an issue we might be able to
+    # move it to bootstrap and just make a copy of ARGV here for later use.
+    #
+    # @example
+    #   profile_switch('-p', '--profile')
+    #
+    def profile_switch(*switches)
+      commands = []
+      commands << switches.shift.to_s until switches.first.to_s.start_with?('-')
+      commands << @feature if commands.empty?
+
+      return unless commands.include?(RC.current_command)
+
+      switches.each do |switch|
+        if index = ARGV.index(switch)
+          RC.current_profile = ARGV[index+1]
+        elsif arg = ARGV.find{ |a| a =~ /#{switch}=(.*?)/ }
+          RC.current_profile = $1  # TODO: better match system
+        end
+      end
     end
 
   private
@@ -207,53 +236,46 @@ module RC
       @bootstrap ||= (
         properties  # prime global properties
 
-        tweak = File.join(TWEAKS_DIR, current_tool + '.rb')
+        tweak = File.join(TWEAKS_DIR, current_command + '.rb')
         if File.exist?(tweak)
-          require tweak
-          # FIXME: invoke config
-        #else
-        #  begin
-        #    require current_tool
-        #  rescue LoadError
-        #    #warn ""
-        #  end
+          require tweak # FIXME: invoke necessary config's b/c of this
         end
 
         bootstrap_require
-
-        #setup = RC.setup(current_tool)
-
-        #configuration.each do |config|
-        #  next unless config.tool?(current_tool)
-
-        #  if setup
-        #    setup.profile_proc.each do |c|
-        #      c.call(config.profile, config)
-        #    end
-        #    if config.profile?(current_profile)
-        #      setup.current_proc.each do |c|
-        #        c.call(config)
-        #      end
-        #    end
-        #  else
-        #    config.call
-        #  end
-        #end
 
         true
       )
     end
 
+    # TODO: Need to override `Kernel.require` class method too.
+
+    #
+    # Override require.
+    #
     def bootstrap_require
       Kernel.module_eval do
         alias_method :require_without_rc, :require
 
         def require(feature)
-          require_without_rc(feature)
+          result = require_without_rc(feature)
 
-          RC.configuration[feature].each do |config|
-            config.configure(feature)
+          return result unless result
+
+          feature_config = RC.configuration[feature]
+
+          return result unless feature_config
+
+          if setup = RC.setup(feature)
+            feature_config.each do |config|
+              setup.call(config)
+            end
+          else
+            feature_config.each do |config|
+              config.call if config.command?
+            end
           end
+
+          return result
         end
       end
     end
@@ -268,15 +290,6 @@ module RC
     #  preconfiguration.each do |c|
     #    c.call if c.match?(tool, profile)
     #  end
-    #end
-
-    ##
-    ##
-    ##
-    #def parse_arguments(*args)
-    #  options  = Hash === args.last ? args.pop : {}
-    #  argument = args.shift
-    #  return argument, options
     #end
 
   end
