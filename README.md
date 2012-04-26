@@ -109,37 +109,41 @@ the tool at hand. Consult the tool's documentation for details.
 
 ## Qualifications
 
-RC can be used with any Ruby-based commandline tool that can be required by
-the same name as the tool, e.g. `rake` can be required via `require 'rake'`,
-and there exists some means of configuring the tool via a toplevel/global
-interface, or the tool has been desinged to directly support RC.
+RC can be used with any Ruby-based commandline tool and there exists some
+means of configuring the tool via a toplevel/global interface, or the tool
+has been desinged to directly support RC.
 
 
 ## Customization
 
-A tool can provide dedicated support for RC by loading the `rc/api` script
-and defining a `config_proc` procedure. For example, the `detroit` project
-defines:
+A tool can provide dedicated support for RC by loading `rc` and using
+the `RC.setup` method to define a configuration procedure. For example, 
+the `detroit` project defines:
 
-    require 'rc/api'
+    require 'rc'
 
-    RC.config_proc('detroit') do |config|
+    RC.setup('detroit', :command) do |config|
       Detroit.rc_config << config
     end
 
-When `detroit` gets around to loading a project's build assemblies, it will
-check `rc_config` setting and evaluate the configurations via Detroit's own
-DSL.
+In our example, `detroit` is required this configuration will be proccessed. The optional
+`:command` argument, ensures that it only happens if `$0 == 'detroit'`. We can
+see that Detroit stores the configuration for later us. When Detroit gets around
+to loading a project's build assemblies, it will check this `rc_config` setting
+and evaluate the configurations found there via Detroit's own DSL.
+
+It is important that 'rc' be required first, ideally before anything else. This
+ensure RC will pick up all configured features.
 
 Some tools will want to support a command line option for selecting a 
 configuration profile. RC has a convenience method to make this very
 easy to do.
 
-    RC.profile_switch('-p', '--profile')
+    RC.profile_switch('qed', '-p', '--profile')
 
 It does not remove the argument from `ARGV`, so the tool's command line option
 parser should still account for it. This simply ensures RC will know what the
-profile is by setting `ENV['profile']` to that given in `ARGV`.
+profile is by setting `ENV['profile']` to the entry following the switch.
 
 
 ## Dependencies
