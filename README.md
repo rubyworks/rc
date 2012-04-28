@@ -1,5 +1,6 @@
-# RC - Ruby Confection
-*Runtime Configuration Management*
+# Ruby Courtier
+
+*Runtime Configuration Controller*
 
 [Homepage](http://rubyworks.github.com/rc) /
 [Source Code](http://github.com/rubyworks/rc) /
@@ -12,7 +13,7 @@
 
 ## Description
 
-RC, short for *Runtime Configuration*, is multi-tenant configuration system
+*Ruby Courtier*, RC for short, is a is multi-tenant runtime configuration system
 for Ruby tools. If was designed to facilitate Ruby-based configuration for
 multiple tools in a single file. It is extremely simple, and univerally applicable
 which makes it easy to understand and flexible in use.
@@ -122,15 +123,18 @@ the `detroit` project defines:
 
     require 'rc'
 
-    RC.setup('detroit', :command) do |config|
-      Detroit.rc_config << config
+    RC.court 'detroit' do |config|
+      if config.command?
+        Detroit.rc_config << config
+      end
     end
 
-In our example, `detroit` is required this configuration will be proccessed. The optional
-`:command` argument, ensures that it only happens if `$0 == 'detroit'`. We can
-see that Detroit stores the configuration for later us. When Detroit gets around
-to loading a project's build assemblies, it will check this `rc_config` setting
-and evaluate the configurations found there via Detroit's own DSL.
+In our example, `detroit` is required this configuration will be proccessed.
+The `if config.command?` condition ensures that it only happens if the config's
+`command` property matches the current command, i.e. `$0 == 'detroit'`. We can
+see that Detroit stores the configuration for later us. When Detroit gets
+around to loading a project's build assemblies, it will check this `rc_config`
+setting and evaluate the configurations found there via Detroit's own DSL.
 
 It is important that 'rc' be required first, ideally before anything else. This
 ensure RC will pick up all configured features.

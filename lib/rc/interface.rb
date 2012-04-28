@@ -191,13 +191,6 @@ module RC
       @setup[tool.to_s]
     end
 
-    ##
-    ## Tool's will use this method to process RC configuration.
-    ##
-    #def commit_configuration
-    #  require 'rc' #bootstrap ?
-    #end
-
     #
     # Set current profile via ARGV switch. This is done immediately,
     # setting `ENV['profile']` to the switch value if this setup is
@@ -296,5 +289,16 @@ module RC
 
   extend Interface
 
+end
+
+# Toplevel convenience method for `RC.setup`.
+#
+# @example
+#   court 'qed' do |config|
+#     QED.configure(config.profile, &config)
+#   end
+#
+def self.court(tool, options={}, &block)
+  RC.setup(tool, options, &block)
 end
 
