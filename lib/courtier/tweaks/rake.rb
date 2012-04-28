@@ -1,5 +1,12 @@
 require 'rake'
 
+court 'rake' do |config|
+  Module.new do
+    extend Rake::DSL
+    module_eval(&config)
+  end
+end
+
 module Rake
   RC_FILES = '.config.rb', 'config.rb', 'Config.rb'
 
@@ -20,9 +27,5 @@ module Rake
   end
 end
 
-module RC
-  class Configuration
-    include Rake::DSL
-  end
-end
-
+# Must manually configure tweaked libraries.
+RC.configure('rake')

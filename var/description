@@ -1,4 +1,2 @@
-RC is a multi-tenant configuration system for Ruby projects.
-It is a spin-off of the original Confection project with
-a simplifed overall design and the ability to work with 
-almost any Ruby-based command line tool.
+Courtier is a multi-tenant configuration system for Ruby projects.
+Courtier can configure almost any Ruby tool or library.

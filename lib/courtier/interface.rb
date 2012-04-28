@@ -1,54 +1,33 @@
-module RC
+module Courtier
   # External requirements.
   require 'yaml'
   require 'finder'
 
   # Internal requirements.
-  require 'rc/core_ext'
-  require 'rc/config'
-  require 'rc/configuration'
-  #require 'rc/config_filter'
-  require 'rc/properties'
-  require 'rc/setup'
+  require 'courtier/core_ext'
+  require 'courtier/config'
+  require 'courtier/configuration'
+  #require 'courtier/config_filter'
+  require 'courtier/properties'
+  require 'courtier/setup'
 
-  # The Interface module extends RC module.
+  # The Interface module extends Courtier module.
   #
-  # A tool can control RC configuration by loading `rc/api` and calling the
-  # `RC.configure` method. There are two approaches to usage, which is used
-  # depends on the needs of the tool. The distinction between the two uses in
-  # depends on the arguments and arity of the block passed to the `configure()`
-  # method.
+  # A tool can control Courtier configuration by loading `courtier` and calling the
+  # toplevel `court` or `Courtier.setup` method with a block that handles the 
+  # configuration for the feature as provided by a project's config file.
   #
-  #   require 'rc/api'
+  # The block will often need to be conditioned on the current profile and/or the
+  # then current command. This is easy enough to do with #profile? and #command?
+  # methods.
   #
-  #   RC.setup('rspec') do |tool|
-  #     # configuration of current profile
-  #     tool.config_proc do |config|
+  #   require 'courtier'
+  #
+  #   Courtier.setup('rspec') do |config|
+  #     if config.profile?
   #       RSpec.configure(&config)
   #     end
   #   end
-  #
-  # Or
-  #
-  #   require 'rc/api'
-  #
-  #   RC.setup('qed') do |tool|
-  #     # configuration of each profile
-  #     tool.config_proc do |profile, config|
-  #       QED.profile(profile, &config)
-  #     end
-  #   end
-  #
-  # This lets RC know how to handle configuration of the respective tool.
-  #
-  # Then, to process the configuration, just before the tool is ready to execute,
-  # call the `commit_configuruation` method.
-  #
-  #   RC.commit_configuration
-  #
-  # It's important to not call `RC.configure!` in "load space". That is
-  # to say, do not call it in code that is run when loading a library.
-  # It ought to be run as part of commands executation procedure.
   #
   module Interface
 
@@ -74,7 +53,7 @@ module RC
     #
     # The tweaks directory is where special augementation script reside
     # the are used to adjust behavior of certain popular tools to work
-    # with RC that would not otherwise do so.
+    # with Courtier that would not otherwise do so.
     #
     TWEAKS_DIR = File.dirname(__FILE__) + '/tweaks'
 
@@ -192,6 +171,11 @@ module RC
     end
 
     #
+    # Same as #setup.
+    #
+    alias_method :court, :setup
+
+    #
     # Set current profile via ARGV switch. This is done immediately,
     # setting `ENV['profile']` to the switch value if this setup is
     # for the current commandline tool. The reason it is done immediately,
@@ -209,13 +193,13 @@ module RC
       commands << switches.shift.to_s until switches.first.to_s.start_with?('-')
       commands << @feature if commands.empty?
 
-      return unless commands.include?(RC.current_command)
+      return unless commands.include?(Courtier.current_command)
 
       switches.each do |switch|
         if index = ARGV.index(switch)
-          RC.current_profile = ARGV[index+1]
+          Courtier.current_profile = ARGV[index+1]
         elsif arg = ARGV.find{ |a| a =~ /#{switch}=(.*?)/ }
-          RC.current_profile = $1  # TODO: better match system
+          Courtier.current_profile = $1  # TODO: better match system
         end
       end
     end
@@ -223,7 +207,7 @@ module RC
   private
 
     #
-    # Activate RC configuration.
+    # Activate Courtier configuration.
     #
     def bootstrap
       @bootstrap ||= (
@@ -247,28 +231,37 @@ module RC
     #
     def bootstrap_require
       Kernel.module_eval do
-        alias_method :require_without_rc, :require
+        alias_method :require_without_courtier, :require
 
         def require(feature)
-          result = require_without_rc(feature)
+          result = require_without_courtier(feature)
 
           return result unless result
 
-          feature_config = RC.configuration[feature]
-
-          return result unless feature_config
-
-          if setup = RC.setup(feature)
-            feature_config.each do |config|
-              setup.call(config)
-            end
-          else
-            feature_config.each do |config|
-              config.call if config.command?
-            end
-          end
+          Courtier.configure(feature)
 
           return result
+        end
+      end
+    end
+
+  public
+
+    #
+    #
+    #
+    def configure(feature)
+      feature_config = Courtier.configuration[feature]
+
+      return result unless feature_config
+
+      if setup = Courtier.setup(feature)
+        feature_config.each do |config|
+          setup.call(config)
+        end
+      else
+        feature_config.each do |config|
+          config.call if config.command?
         end
       end
     end
@@ -291,7 +284,7 @@ module RC
 
 end
 
-# Toplevel convenience method for `RC.setup`.
+# Toplevel convenience method for `Courtier.setup`.
 #
 # @example
 #   court 'qed' do |config|
@@ -299,6 +292,6 @@ end
 #   end
 #
 def self.court(tool, options={}, &block)
-  RC.setup(tool, options, &block)
+  Courtier.court(tool, options, &block)
 end
 

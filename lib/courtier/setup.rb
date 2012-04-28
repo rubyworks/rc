@@ -1,4 +1,4 @@
-module RC
+module Courtier
 
   # Tool configuration setup is used to customize how a tool handles
   # configuration.
@@ -22,14 +22,14 @@ module RC
     #
     #
     def call(config)
-      block.call(config)
+      @block.call(config)
     end
 
     #
     #
     #
     def to_proc
-      block
+      @block
     end
 
   end

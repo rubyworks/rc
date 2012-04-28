@@ -1,4 +1,4 @@
-module RC
+module Courtier
 
   # The Configuration class encapsulates a project/library's tool 
   # configuration.
@@ -157,7 +157,7 @@ module RC
           from_name, from_opts = from, {}
         end
 
-        from_config = RC.configuration(from_name)
+        from_config = Courtier.configuration(from_name)
 
         from_opts[:feature] = options[:feature] unless from_opts.key?(:feature) if options[:feature]
         from_opts[:command] = options[:command] unless from_opts.key?(:command) if options[:command]
@@ -234,7 +234,7 @@ module RC
     # use the current command if no +command+ is given.
     #
     def profile_names(command=nil)
-      command = command || RC.current_command
+      command = command || Courtier.current_command
 
       list = []
       @_store.each do |feature, configs|
@@ -248,7 +248,7 @@ module RC
     end
 
     #def inspect
-    #  "#<RC::Configuration:#{object_id} @file=#{@file}>"
+    #  "#<Courtier::Configuration:#{object_id} @file=#{@file}>"
     #end
 
   private

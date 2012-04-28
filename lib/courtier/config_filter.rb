@@ -1,4 +1,4 @@
-module RC
+module Courtier
 
   #
   class ConfigFilter

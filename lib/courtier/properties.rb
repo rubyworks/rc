@@ -1,4 +1,4 @@
-module RC
+module Courtier
 
   # Currently properties derive from a project's .ruby file.
   # This will be expanded upon in future version to allow 

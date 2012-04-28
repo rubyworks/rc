@@ -1,14 +1,12 @@
 # Ruby Courtier
 
-*Runtime Configuration Controller*
-
-[Homepage](http://rubyworks.github.com/rc) /
-[Source Code](http://github.com/rubyworks/rc) /
-[Report Issue](http://github.com/rubyworks/rc/issues) /
+[Homepage](http://rubyworks.github.com/courtier) /
+[Source Code](http://github.com/rubyworks/courtier) /
+[Report Issue](http://github.com/rubyworks/courtier/issues) /
 [Mailing List](http://googlegroups.com/group/rubyworks-mailinglist) /
 [IRC Channel](http://chat.us.freenode.net/rubyworks)
 
-[![Build Status](https://secure.travis-ci.org/rubyworks/rc.png)](http://travis-ci.org/rubyworks/rc)
+[![Build Status](https://secure.travis-ci.org/rubyworks/courtier.png)](http://travis-ci.org/rubyworks/courtier)
 
 
 ## Description
@@ -22,13 +20,13 @@ which makes it easy to understand and flexible in use.
 ## Installation
 
 To use RC via tools that support RC directly, there is nothing you need to
-install. Installing the said tool should install `rc` via a dependency and
-load `rc` when the tool is used.
+install. Installing the said tool should install `courtier` via a dependency and
+load `courtier` when the tool is used.
 
 To use RC with tools that don't provide direct support, first install RC
 in the usual manner via RubyGems.
 
-    $ gem install rc
+    $ gem install courtier
 
 Then add `-rc` to your system's `RUBYOPT` environment variable.
 
@@ -117,13 +115,13 @@ has been desinged to directly support RC.
 
 ## Customization
 
-A tool can provide dedicated support for RC by loading `rc` and using
-the `RC.setup` method to define a configuration procedure. For example, 
+A tool can provide dedicated support for RC by loading `rc` or `courtier`
+and using the `court` method to define a configuration procedure. For example, 
 the `detroit` project defines:
 
     require 'rc'
 
-    RC.court 'detroit' do |config|
+    court 'detroit' do |config|
       if config.command?
         Detroit.rc_config << config
       end
@@ -136,14 +134,14 @@ see that Detroit stores the configuration for later us. When Detroit gets
 around to loading a project's build assemblies, it will check this `rc_config`
 setting and evaluate the configurations found there via Detroit's own DSL.
 
-It is important that 'rc' be required first, ideally before anything else. This
-ensure RC will pick up all configured features.
+It is important that Courtier be required first, ideally before anything else. This
+ensures it will pick up all configured features.
 
 Some tools will want to support a command line option for selecting a 
 configuration profile. RC has a convenience method to make this very
 easy to do.
 
-    RC.profile_switch('qed', '-p', '--profile')
+    Courtier.profile_switch('qed', '-p', '--profile')
 
 It does not remove the argument from `ARGV`, so the tool's command line option
 parser should still account for it. This simply ensures RC will know what the
