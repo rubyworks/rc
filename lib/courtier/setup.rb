@@ -10,7 +10,13 @@ module Courtier
     #
     def initialize(feature, options={}, &block)
       @feature = feature.to_s
-      @block   = block
+
+      @command = @feature
+      @command = options[:command] || options[:tool] if options.key?(:command) || options.key?(:tool)
+
+      @profile = options[:profile] if options.key?(:profile)
+
+      @block = block
     end
 
     #
@@ -22,6 +28,9 @@ module Courtier
     #
     #
     def call(config)
+      return unless config.command == @command.to_s if @command
+      return unless config.profile == @profile.to_s if @profile
+
       @block.call(config)
     end
 

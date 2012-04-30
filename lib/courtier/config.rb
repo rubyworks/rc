@@ -19,7 +19,7 @@ module Courtier
     #   Any additional properties associated with the config entry.
     #
     def initialize(tool, properties={}, &block)
-      @property = {:profile=>:default}
+      @property = {:profile=>'default'}
 
       @property[:command] = tool.to_s
       @property[:feature] = tool.to_s
@@ -48,26 +48,14 @@ module Courtier
     end
 
     #
-    # The name of feature being configured.
+    # The feature being configured.
     #
     def feature
       @property[:feature]
     end
 
     #
-    # Change the feature name. Note, this will rarely be used since,
-    # generally speaking, configurations tend to be very tool
-    # specific.
-    #
-    # @param [#to_sym] name
-    #   The tool's name.
-    #
-#    def feature=(name)
-#      @properties[:feature] = name.to_sym
-#    end
-
-    #
-    # The name of tool being configured.
+    # The name of command being configured.
     #
     def command
       @property[:command]
@@ -79,33 +67,11 @@ module Courtier
     alias :tool :command
 
     #
-    # Change the tool name. Note, this will rarely be used since,
-    # generally speaking, configurations tend to be very tool
-    # specific.
-    #
-    # @param [#to_sym] name
-    #   The tool's name.
-    #
-#    def command=(name)
-#      @comman = name.to_sym
-#    end
-
-    #
     # The name of the profile to which this configuration belongs.
     #
     def profile
       @property[:profile]
     end
-
-    #
-    # Change the profile name.
-    #
-    # @param [#to_sym,nil] name
-    #   Profile name, or +nil+.
-    #
-#    def profile=(name)
-#      @profile = (name || :default).to_sym
-#    end
 
     #
     # The library from which this configuration derives.
@@ -116,6 +82,13 @@ module Courtier
     end
 
     #
+    #
+    #
+    def onload?
+      @property[:onload]
+    end
+
+    #
     # Most configuration are scripted. In thos cases the 
     # `@block` attributes holds the Proc instance, otherwise
     # it is `nil`.
@@ -123,17 +96,7 @@ module Courtier
     attr :block
 
     #
-    # Set the configuration procedure.
-    #
-    # @param [Proc] procedure
-    #   The configuration procedure.
-    #
-#    def block=(block)
-#      @block = block #.to_proc
-#    end
-
-    #
-    #
+    # IDEA: Presets would be processed first and not require the underlying feature.
     #
     #def preset?
     #  @property[:preset]
@@ -146,6 +109,17 @@ module Courtier
     #
     def arity
       @block ? @block.arity : 0
+    end
+
+    #
+    # Require the feature.
+    #
+    def require_feature
+      begin
+        require feature
+      rescue LoadError
+        #warn "No such feature -- `#{feature}'"
+      end
     end
 
     #
@@ -258,6 +232,17 @@ module Courtier
     #def inspect
     #  "#<#{self.class.name}:#{object_id} @tool=%s @profile=%s>" % [tool.inspect, profile.inspect]
     #end
+
+    #
+    # Does the configuration apply?
+    #
+    # @return [Boolean]
+    #
+    def apply?()
+      return false unless command? if command
+      return false unless profile? if profile
+      return true
+    end
 
   end
 

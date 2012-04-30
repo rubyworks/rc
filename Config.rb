@@ -15,7 +15,7 @@ config 'detroit' do
   end
 
   service :gem do |s|
-    s.gemspec = 'pkg/rc.gemspec'
+    s.gemspec = 'pkg/courtier.gemspec'
   end
 
   service :github do |s|
@@ -46,7 +46,7 @@ end
 # IMPORTANT! Unfortunately this will not give us a reliable report
 # b/c QED uses the RC gem, so SimpleCov can't differentiate the two.
 #
-config 'qed', 'cov' do
+config 'qed', profile: 'cov' do
   puts "QED w/coverage!"
 
   require 'simplecov'

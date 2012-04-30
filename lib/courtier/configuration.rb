@@ -65,12 +65,13 @@ module Courtier
     def initialize(file=nil)
       @file = file
 
-      @_store = Hash.new{ |h,k| h[k]=[] }
-      @_state = {}
+      @_config = Hash.new{ |h,k| h[k]=[] }
+      #@_onload = Hash.new{ |h,k| h[k]=[] }
 
       # TODO: does this rescue make sense here?
       begin
-        instance_eval(File.read(file), file) if file      
+        dsl = DSL.new(self)
+        dsl.instance_eval(File.read(file), file) if file      
       rescue => e
         raise e if $DEBUG
         warn e.message
@@ -78,18 +79,9 @@ module Courtier
     end
 
     #
-    # Profile block.
-    #
-    # @param [String,Symbol] name
-    #   A profile name.
-    #
-    def profile(name, state={}, &block)
-      raise SyntaxError, "nested profile sections" if @_state[:profile]
-      original_state = @_state.dup
-      @_state.update(state)
-      @_state[:profile] = name.to_s
-      instance_eval(&block)
-      @_state = original_state
+    def evaluate(*args, &block)
+      dsl = DSL.new(self)
+      dsl.instance_eval(*args, &block)
     end
 
     #
@@ -115,79 +107,51 @@ module Courtier
     #     config :qed, :from=>'qed'
     #   end
     #
-    def config(tool, *args, &block)
-      options = (Hash===args.last ? args.pop : {})
+    def config(target, options={}, &block)
+      #options[:profile] = (options[:profile] || 'default').to_s
+      #options[:command] = command.to_s unless options.key?(:command)
+      #options[:feature] = command.to_s unless options.key?(:feature)
+      #command = options[:command].to_s
 
-      case args.first
-      when Symbol
-        profile = args.shift
-      when String
-        profile = args.shift unless args.first.index("\n")
-      end
-      profile = options[:profile] unless profile
+      # IDEA: other import options such as local file?
 
-      # TODO: not sure if this YAML feature is worth the additonal code
-      data = args.shift
-      raise ArgumentError, "must use data or block, not both" if data && block
-      if data
-        data = data.tabto(0)
-        block = Proc.new do
-          YAML.load(data)
-        end
+      configs_from(options).each do |c|
+        @_config[target.to_s] << c.copy(options)
       end
 
-      raise ArgumentError, "too many arguments"      if args.first
-      raise SyntaxError,   "nested profile sections" if profile && @_state[:profile]
+      return unless block
 
-      profile = @_state[:profile] unless profile
+      @_config[target.to_s] << Config.new(target, options, &block)
+    end
 
-      options[:feature] = tool.to_s unless options.key?(:feature)
-      options[:command] = tool.to_s unless options.key?(:command)
-      options[:profile] = (profile || 'default').to_s
+=begin
+    #
+    #
+    #
+    def onload(feature, options={}, &block)
+      #options[:profile] = (options[:profile] || 'default').to_s
+
+      #options[:feature] = feature.to_s unless options.key?(:feature)
+      #options[:command] = feature.to_s unless options.key?(:command)
 
       feature = options[:feature].to_s
 
-      # TODO: other import options such as local file?
-      from = options[:from]
-
-      if from
-        if Array === from
-          from_name, from_opts = *from
-        else
-          from_name, from_opts = from, {}
-        end
-
-        from_config = Courtier.configuration(from_name)
-
-        from_opts[:feature] = options[:feature] unless from_opts.key?(:feature) if options[:feature]
-        from_opts[:command] = options[:command] unless from_opts.key?(:command) if options[:command]
-        from_opts[:profile] = options[:profile] unless from_opts.key?(:profile) if options[:profile]
-
-        from_opts[:feature] = from_opts[:feature].to_s if from_opts[:feature]
-        from_opts[:command] = from_opts[:command].to_s if from_opts[:command]
-        from_opts[:profile] = from_opts[:profile].to_s if from_opts[:profile]
-
-        from_config.each do |ftr, confs|
-          confs.each_with_index do |c, i|
-            if c.match?(from_opts)
-              @_store[feature] << c.copy(options)
-            end
-          end
-        end
-
-        return unless block
+      # IDEA: what about local file import?
+      configs_from(options).each do |c|
+        @_onload[feature] << c.copy(options)
       end
 
-      config = Config.new(feature, options, &block)
+      return unless block
 
-      @_store[feature] << config
+      @_onload[feature] << Config.new(feature, options, &block)
     end
+=end
 
     #
     #
     #
     def [](feature)
-      @_store[feature.to_s]
+      @_config[feature.to_s]
     end
 
     #
@@ -201,14 +165,14 @@ module Courtier
     #   end
     #
     def each(&block)
-      @_store.each(&block)
+      @_config.each(&block)
     end
 
     #
     # The number of feature configs.
     #
     def size
-      @_store.size
+      @_config.size
     end
 
     #
@@ -218,7 +182,7 @@ module Courtier
     #
     def to_a
       list = []
-      @_store.each do |feature, configs|
+      @_config.each do |feature, configs|
         list.concat(configs)
       end
       list
@@ -237,7 +201,7 @@ module Courtier
       command = command || Courtier.current_command
 
       list = []
-      @_store.each do |feature, configs|
+      @_config.each do |feature, configs|
         configs.each do |c|
           if c.command?(command)
             list << c.profile
@@ -267,6 +231,103 @@ module Courtier
         pwd = File.dirname(pwd)
       end
       return nil   
+    end
+
+    # TODO: other import options such as local file?
+
+    #
+    #
+    #
+    def configs_from(options)
+      from = options[:from]
+      list = []
+
+      return list unless from
+
+      if Array === from
+        from_name, from_opts = *from
+      else
+        from_name, from_opts = from, {}
+      end
+
+      from_config = Courtier.configuration(from_name)
+
+      from_opts[:feature] = options[:feature] unless from_opts.key?(:feature) if options[:feature]
+      from_opts[:command] = options[:command] unless from_opts.key?(:command) if options[:command]
+      from_opts[:profile] = options[:profile] unless from_opts.key?(:profile) if options[:profile]
+
+      from_opts[:feature] = from_opts[:feature].to_s if from_opts[:feature]
+      from_opts[:command] = from_opts[:command].to_s if from_opts[:command]
+      from_opts[:profile] = from_opts[:profile].to_s if from_opts[:profile]
+
+      from_config.each do |ftr, confs|
+        confs.each_with_index do |c, i|
+          if c.match?(from_opts)
+            list << c.copy(options)
+          end
+        end
+      end
+
+      list
+    end
+
+    #
+    class DSL
+
+      #
+      #
+      #
+      def initialize(configuration)
+        @configuration = configuration
+        @_options = {}
+      end
+
+      #
+      #
+      #
+      def profile(name, &block)
+        raise SyntaxError, "nested profile sections" if @_options[:profile]
+        @_options[:profile] = name.to_s
+        instance_eval(&block)
+        @_options.delete(:profile)
+      end
+
+      #
+      # Profile block.
+      #
+      # @param [String,Symbol] name
+      #   A profile name.
+      #
+      def profile(name, state={}, &block)
+        raise SyntaxError, "nested profile sections" if @_options[:profile]
+        original_state = @_options.dup
+        @_options.update(state)
+        @_options[:profile] = name.to_s
+        instance_eval(&block)
+        @_options = original_state
+      end
+
+      #
+      #
+      def config(command, options={}, &block)
+        nested_keys = @_options.keys & options.keys.map{|k| k.to_sym}
+        raise ArgumentError, "nested #{nested_keys.join(', ')}" unless nested_keys.empty?
+
+        options = @_options.merge(options)
+        @configuration.config(command, options, &block)
+      end
+
+      #
+      #
+      def onload(feature, options={}, &block)
+        nested_keys = @_options.keys & options.keys.map{|k| k.to_sym}
+        raise ArgumentError, "nested #{nested_keys.join(', ')}" unless nested_keys.empty?
+
+        options = @_options.merge(options)
+        options[:onload] = true
+        @configuration.config(feature, options, &block)
+      end
+
     end
 
   end

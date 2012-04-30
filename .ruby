@@ -1,6 +1,7 @@
 ---
 source:
 - var
+- var/
 authors:
 - name: Trans
   email: transfire@gmail.com
@@ -10,6 +11,7 @@ copyrights:
   license: BSD-2-Clause
 requirements:
 - name: finder
+- name: loaded
 - name: detroit
   groups:
   - build
@@ -26,26 +28,36 @@ dependencies: []
 alternatives: []
 conflicts: []
 repositories:
-- uri: git://github.com/rubyworks/rc.git
+- uri: git://github.com/rubyworks/courtier.git
   scm: git
   name: upstream
 resources:
-  home: http://rubyworks.github.com/rc
-  docs: http://rubydoc.info/gems/rc/frames
-  code: http://github.com/rubyworks/rc
-  mail: http://groups.google.com/group/rubyworks-mailinglist
-  chat: http://chat.us.freenode.net/rubyworks
+- uri: http://rubyworks.github.com/courtier
+  name: home
+  type: home
+- uri: http://rubydoc.info/gems/courtier/frames
+  name: docs
+  type: doc
+- uri: http://github.com/rubyworks/courtier
+  name: code
+  type: code
+- uri: http://groups.google.com/group/rubyworks-mailinglist
+  name: mail
+  type: mail
+- uri: http://chat.us.freenode.net/rubyworks
+  name: chat
+  type: chat
 extra: {}
 load_path:
 - lib
-name: rc
-title: RC
 revision: 0
 created: '2011-11-06'
-summary: Multi-tenant configuration for Ruby.
-version: 0.1.1
-description: ! "RC is a multi-tenant configuration system for Ruby projects.\nIt is
-  a spin-off of the original Confection project with\na simplifed overall design and
-  the ability to work with \nalmost any Ruby-based command line tool."
+summary: The best way to manage your application's configuration.
+title: Courtier
+version: 0.2.0
+name: courtier
+description: ! 'Courtier is a multi-tenant configuration system for Ruby projects.
+
+  Courtier can configure almost any Ruby tool or library.'
 organization: Rubyworks
-date: '2012-04-09'
+date: '2012-04-28'

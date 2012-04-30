@@ -2,6 +2,7 @@ module Courtier
   # External requirements.
   require 'yaml'
   require 'finder'
+  require 'loaded'
 
   # Internal requirements.
   require 'courtier/core_ext'
@@ -147,7 +148,7 @@ module Courtier
       end
     end
 
-    # TODO: Maybe properties should comf Configuration class and be per-gem.
+    # TODO: Maybe properties should come from Configuration class and be per-gem.
     #       I don't see a use for imported properties, but just in case.
 
     #
@@ -162,18 +163,22 @@ module Courtier
     end
 
     #
-    # Specialize feature's configuration setup.
+    # Define a specialized configuration handler.
     #
-    def setup(tool, options={}, &block)
+    def court(tool, options={}, &block)
       @setup ||= {}
-      @setup[tool.to_s] = Setup.new(tool, options, &block) if block
+      tool = tool.to_s
+      if block
+        @setup[tool] = Setup.new(tool, options, &block)
+        #path = Find.load_path(tool, :absolute=>true)
+        #if path
+        #  if $LOADED_FEATURES.include?(path)
+        #    configure(tool)
+        #  end
+        #end
+      end
       @setup[tool.to_s]
     end
-
-    #
-    # Same as #setup.
-    #
-    alias_method :court, :setup
 
     #
     # Set current profile via ARGV switch. This is done immediately,
@@ -182,92 +187,127 @@ module Courtier
     # rather than assigning it in bootstrap, is b/c option parsers somtimes
     # consume ARGV as they parse it, and by then it would too late.
     #
-    # NOTE: If this approach proves to be an issue we might be able to
-    # move it to bootstrap and just make a copy of ARGV here for later use.
-    #
     # @example
-    #   profile_switch('-p', '--profile')
+    #   Courtier.profile_switch('qed', '-p', '--profile')
     #
-    def profile_switch(*switches)
-      commands = []
-      commands << switches.shift.to_s until switches.first.to_s.start_with?('-')
-      commands << @feature if commands.empty?
+    def profile_switch(command, *switches)
+      return unless command.to_s == Courtier.current_command
 
-      return unless commands.include?(Courtier.current_command)
-
-      switches.each do |switch|
+      switches.each do |switch, envar|
         if index = ARGV.index(switch)
-          Courtier.current_profile = ARGV[index+1]
+          self.current_profile = ARGV[index+1]
         elsif arg = ARGV.find{ |a| a =~ /#{switch}=(.*?)/ }
-          Courtier.current_profile = $1  # TODO: better match system
+          value = $1
+          value = value[1..-2] if value.start_with?('"') && value.end_with?('"')
+          value = value[1..-2] if value.start_with?("'") && value.end_with?("'")
+          self.currrent_profile = value
         end
       end
+    end
+
+    #
+    # Set enviroment variable(s) to command line switch value(s). This is a more general
+    # form of #profile_switch and will probably not get much use in this context.
+    #
+    # @example
+    #   Courtier.switch('qed', '-p'=>'profile', '--profile'=>'profile')
+    #
+    def switch(command, switches={})
+      return unless command.to_s == Courtier.current_command
+
+      switches.each do |switch, envar|
+        if index = ARGV.index(switch)
+          ENV[envar] = ARGV[index+1]
+        elsif arg = ARGV.find{ |a| a =~ /#{switch}=(.*?)/ }
+          value = $1
+          value = value[1..-2] if value.start_with?('"') && value.end_with?('"')
+          value = value[1..-2] if value.start_with?("'") && value.end_with?("'")
+          ENV[envar] = value
+        end
+      end
+    end
+
+    #
+    #
+    #
+    def configure(tool, options={}, &setup)
+      court(tool, options, &setup)
+      _configure(tool)
     end
 
   private
 
     #
-    # Activate Courtier configuration.
+    # Setup courtier system.
     #
     def bootstrap
       @bootstrap ||= (
         properties  # prime global properties
-
-        tweak = File.join(TWEAKS_DIR, current_command + '.rb')
-        if File.exist?(tweak)
-          require tweak # FIXME: invoke necessary config's b/c of this
-        end
-
         bootstrap_require
-
         true
       )
     end
 
-    # TODO: Need to override `Kernel.require` class method too.
+    # TODO: Also add loaded callback ?
 
     #
     # Override require.
     #
     def bootstrap_require
-      Kernel.module_eval do
-        alias_method :require_without_courtier, :require
-
-        def require(feature)
-          result = require_without_courtier(feature)
-
-          return result unless result
-
-          Courtier.configure(feature)
-
-          return result
+      def Kernel.required(feature)
+        config = Courtier.configuration[feature]
+        if config
+          setup = Courtier.court(feature)  # FIXME: how to differentiate feature from command setup ?
+          config.each do |config|
+            next unless config.onload? # only command config
+            next unless config.apply?
+            setup ? setup.call(config) : config.call
+          end
         end
+        super(feature) if defined?(super)
       end
     end
 
-  public
+    #
+    # Copnfgure current commnad. This is used by the `rc` script.
+    #
+    def autoconfigure
+      _configure(current_command)
+    end
 
     #
     #
     #
-    def configure(feature)
-      feature_config = Courtier.configuration[feature]
+    def _configure(command) #, &setup)
+      tweak(command)
 
-      return result unless feature_config
+      command_config = Courtier.configuration[command]
 
-      if setup = Courtier.setup(feature)
-        feature_config.each do |config|
-          setup.call(config)
-        end
-      else
-        feature_config.each do |config|
-          config.call if config.command?
-        end
+      return unless command_config
+
+      setup = Courtier.court(command)
+
+      command_config.each do |config|
+        next if config.onload? # not command config
+        next unless config.apply?
+        config.require_feature
+        setup ? setup.call(config) : config.call
+      end
+    end
+
+    #
+    #
+    #
+    def tweak(command)
+      tweak = File.join(TWEAKS_DIR, command + '.rb')
+      if File.exist?(tweak)
+        require tweak
       end
     end
 
     ##
-    ## Setup configuration.
+    ## IDEA: Preconfigurations occur before other comamnd configs and
+    ##       do not require feature.
     ##
     #def preconfigure(options={})
     #  tool    = options[:tool]    || current_tool
@@ -282,9 +322,10 @@ module Courtier
 
   extend Interface
 
+  bootstrap  # prepare system
 end
 
-# Toplevel convenience method for `Courtier.setup`.
+# Toplevel convenience method for `Courtier.court`.
 #
 # @example
 #   court 'qed' do |config|
@@ -294,4 +335,19 @@ end
 def self.court(tool, options={}, &block)
   Courtier.court(tool, options, &block)
 end
+
+# Toplevel convenience method for `Courtier.configure`.
+# Configure's tool immediately.
+#
+# @example
+#   configure 'qed' do |config|
+#     QED.configure(config.profile, &config)
+#   end
+#
+def self.configure(tool, options={}, &block)
+  Courtier.configure(tool, options, &block)
+end
+
+# @deprecated Alternate namespace name.
+RC = Courtier
 

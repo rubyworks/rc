@@ -9,7 +9,7 @@ Let's say we have a configuration file `config.rb` containing:
       "example config"
     end
 
-    config :example, :something do
+    config :example, :profile=>:something do
       "example config using profile"
     end
 

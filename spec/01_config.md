@@ -7,8 +7,8 @@ and procedure.
       'example'
     end
 
-    config.tool          #=> 'foo'
     config.command       #=> 'foo'
+    config.feature       #=> 'foo'
     config.profile       #=> 'bar'
     config.to_proc.call  #=> 'example'
 

@@ -13,7 +13,7 @@ using the `:from` option.
 
 The configuration can also be imported from a different profile.
 
-    rc.config :qed, :coverage, :from=>['qed', :profile=>:simplecov]
+    rc.config :qed, :profile=>:coverage, :from=>['qed', :profile=>:simplecov]
 
     rc.to_a.size.assert == 2
 

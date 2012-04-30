@@ -9,7 +9,7 @@
 [![Build Status](https://secure.travis-ci.org/rubyworks/courtier.png)](http://travis-ci.org/rubyworks/courtier)
 
 
-## Description
+## About
 
 *Ruby Courtier*, RC for short, is a is multi-tenant runtime configuration system
 for Ruby tools. If was designed to facilitate Ruby-based configuration for

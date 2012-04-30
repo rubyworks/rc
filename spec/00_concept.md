@@ -1,22 +1,23 @@
-= RC
+# Ruby Courtier
 
-The purpose of RC is to provide unified configuration management across multiple
-tools for Ruby. The structure of an RC configuration file is very simple.
-It is a ruby script sectioned into named blocks:
+The purpose of Courtier is to provide unified configuration management
+for Ruby tools.
 
-  config :rake do
-    # ... rake tasks ...
+Courtier designates a single per-project configuration file, named
+either `.config.rb`, `Config.rb` or `config.rb`, looked up in that 
+order. The structure of this configuration file is very simple.
+It is a ruby script sectioned into named `config` and `onload`
+blocks:
+
+  config 'rubytest' do
+    # ... configure rubytest command ...
   end
 
-  config :vclog do
-    # ... configure vclog ...
+  onload 'rake' do
+    # ... when rake is required then ...
   end
 
 Utilization of the these configurations may be handled by the consuming 
-application, but can be used by any tool if `rc` is loaded via RUBYOPT.
-
-To work with RC in this specification, we want to avoid the automatic
-bootstrap, so we load the `interface` script instead.
-
-  require 'rc/interface'
+application, but can be used on any Ruby-based tool if `-rc` is added 
+to RUBYOPT.
 

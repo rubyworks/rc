@@ -1,8 +1,8 @@
-# Runtime Configuration system.
+# Runtime Configuration for Ruby
 #
-module RC
-  require 'rc/api'
-  bootstrap
+module Courtier
+  require 'courtier/interface'
+  autoconfigure
 end
 
 # Copyright (c) 2011 Rubyworks (BSD-2-Clause)
