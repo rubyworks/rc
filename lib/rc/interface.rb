@@ -1,4 +1,4 @@
-module Courtier
+module RC
   # External requirements.
   require 'yaml'
   require 'finder'
@@ -12,10 +12,10 @@ module Courtier
   require 'courtier/properties'
   require 'courtier/setup'
 
-  # The Interface module extends Courtier module.
+  # The Interface module extends RC module.
   #
-  # A tool can control Courtier configuration by loading `courtier` and calling the
-  # toplevel `court` or `Courtier.setup` method with a block that handles the 
+  # A tool can control RC configuration by loading `courtier` and calling the
+  # toplevel `court` or `RC.setup` method with a block that handles the 
   # configuration for the feature as provided by a project's config file.
   #
   # The block will often need to be conditioned on the current profile and/or the
@@ -24,7 +24,7 @@ module Courtier
   #
   #   require 'courtier'
   #
-  #   Courtier.setup('rspec') do |config|
+  #   RC.setup('rspec') do |config|
   #     if config.profile?
   #       RSpec.configure(&config)
   #     end
@@ -54,7 +54,7 @@ module Courtier
     #
     # The tweaks directory is where special augementation script reside
     # the are used to adjust behavior of certain popular tools to work
-    # with Courtier that would not otherwise do so.
+    # with RC that would not otherwise do so.
     #
     TWEAKS_DIR = File.dirname(__FILE__) + '/tweaks'
 
@@ -163,20 +163,28 @@ module Courtier
     end
 
     #
-    # Define a specialized configuration handler.
+    # Deactivate courtship altogether.
+    #
+    def uncourt(tool)
+      @setup[tool.to_s] = false
+    end
+
+    #
+    # Define a custom configuration handler.
     #
     def court(tool, options={}, &block)
-      @setup ||= {}
       tool = tool.to_s
+
+      @setup ||= {}
+
       if block
         @setup[tool] = Setup.new(tool, options, &block)
-        #path = Find.load_path(tool, :absolute=>true)
-        #if path
-        #  if $LOADED_FEATURES.include?(path)
-        #    configure(tool)
-        #  end
-        #end
-      end
+
+        if tool == current_tool
+          configure(tool) unless autoconfig?
+        end
+      end     
+
       @setup[tool.to_s]
     end
 
@@ -188,10 +196,10 @@ module Courtier
     # consume ARGV as they parse it, and by then it would too late.
     #
     # @example
-    #   Courtier.profile_switch('qed', '-p', '--profile')
+    #   RC.profile_switch('qed', '-p', '--profile')
     #
     def profile_switch(command, *switches)
-      return unless command.to_s == Courtier.current_command
+      return unless command.to_s == RC.current_command
 
       switches.each do |switch, envar|
         if index = ARGV.index(switch)
@@ -210,10 +218,10 @@ module Courtier
     # form of #profile_switch and will probably not get much use in this context.
     #
     # @example
-    #   Courtier.switch('qed', '-p'=>'profile', '--profile'=>'profile')
+    #   RC.switch('qed', '-p'=>'profile', '--profile'=>'profile')
     #
     def switch(command, switches={})
-      return unless command.to_s == Courtier.current_command
+      return unless command.to_s == RC.current_command
 
       switches.each do |switch, envar|
         if index = ARGV.index(switch)
@@ -230,12 +238,38 @@ module Courtier
     #
     #
     #
-    def configure(tool, options={}, &setup)
-      court(tool, options, &setup)
-      _configure(tool)
+    def autoconfig?
+      @autoconfigure
     end
 
   private
+
+    #
+    #
+    #
+    def autoconfigure
+      @autoconfig = true
+      configure(current_tool)
+    end
+
+    #
+    # Copnfgure current commnad. This is used by the `rc` script.
+    #
+    def configure(tool)
+      tweak(tool)
+
+      configs = RC.configuration[tool]
+
+      return unless configs
+
+      configs.each do |config|
+        next unless config.apply_to_tool?
+        config.require_feature if autoconfig?
+        setup = RC.court(tool)
+        next if setup == false  # deactivated
+        setup ? setup.call(config) : config.call
+      end
+    end
 
     #
     # Setup courtier system.
@@ -255,43 +289,14 @@ module Courtier
     #
     def bootstrap_require
       def Kernel.required(feature)
-        config = Courtier.configuration[feature]
+        config = RC.configuration[feature]
         if config
-          setup = Courtier.court(feature)  # FIXME: how to differentiate feature from command setup ?
           config.each do |config|
-            next unless config.onload? # only command config
-            next unless config.apply?
-            setup ? setup.call(config) : config.call
+            next unless config.apply_to_feature?
+            config.call
           end
         end
         super(feature) if defined?(super)
-      end
-    end
-
-    #
-    # Copnfgure current commnad. This is used by the `rc` script.
-    #
-    def autoconfigure
-      _configure(current_command)
-    end
-
-    #
-    #
-    #
-    def _configure(command) #, &setup)
-      tweak(command)
-
-      command_config = Courtier.configuration[command]
-
-      return unless command_config
-
-      setup = Courtier.court(command)
-
-      command_config.each do |config|
-        next if config.onload? # not command config
-        next unless config.apply?
-        config.require_feature
-        setup ? setup.call(config) : config.call
       end
     end
 
@@ -325,7 +330,7 @@ module Courtier
   bootstrap  # prepare system
 end
 
-# Toplevel convenience method for `Courtier.court`.
+# Toplevel convenience method for `RC.court`.
 #
 # @example
 #   court 'qed' do |config|
@@ -333,10 +338,10 @@ end
 #   end
 #
 def self.court(tool, options={}, &block)
-  Courtier.court(tool, options, &block)
+  RC.court(tool, options, &block)
 end
 
-# Toplevel convenience method for `Courtier.configure`.
+# Toplevel convenience method for `RC.configure`.
 # Configure's tool immediately.
 #
 # @example
@@ -345,9 +350,6 @@ end
 #   end
 #
 def self.configure(tool, options={}, &block)
-  Courtier.configure(tool, options, &block)
+  RC.configure(tool, options, &block)
 end
-
-# @deprecated Alternate namespace name.
-RC = Courtier
 

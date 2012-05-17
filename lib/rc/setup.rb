@@ -1,4 +1,4 @@
-module Courtier
+module RC
 
   # Tool configuration setup is used to customize how a tool handles
   # configuration.

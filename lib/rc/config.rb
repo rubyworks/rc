@@ -1,4 +1,4 @@
-module Courtier
+module RC
 
   # Config encapsulates a single configuration entry as defined
   # in a project's configuration file.
@@ -191,7 +191,7 @@ module Courtier
     #
     # @return [Boolean]
     #
-    def feature?(feature=Courtier.current_feature)
+    def feature?(feature=RC.current_feature)
       self.feature == feature.to_s
     end
 
@@ -200,16 +200,17 @@ module Courtier
     #
     # @return [Boolean]
     #
-    def command?(command=Courtier.current_command)
+    def command?(command=RC.current_command)
       self.command == command.to_s
     end
+    alias_method :tool, :command?
 
     #
     # Does the given `profile` match the config's profile?
     #
     # @return [Boolean]
     #
-    def profile?(profile=Courtier.current_profile)
+    def profile?(profile=RC.current_profile)
       self.profile == (profile || :default).to_s
     end
 
@@ -219,7 +220,7 @@ module Courtier
     #def configure(feature)
     #  return false if self.feature != feature 
     #
-    #  if setup = Courtier.setup(feature)
+    #  if setup = RC.setup(feature)
     #    setup.call(self)
     #  else
     #    block.call if command?
@@ -238,7 +239,16 @@ module Courtier
     #
     # @return [Boolean]
     #
-    def apply?()
+    def apply_to_command?
+      return false if onload?
+      return false unless command? if command
+      return false unless profile? if profile
+      return true
+    end
+    alias_method :apply_to_tool?, :apply_to_command?
+
+    def apply_to_feature?
+      return false unless onload?
       return false unless command? if command
       return false unless profile? if profile
       return true

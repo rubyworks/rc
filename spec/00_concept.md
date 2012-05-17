@@ -1,9 +1,9 @@
-# Ruby Courtier
+# R.C.
 
-The purpose of Courtier is to provide unified configuration management
+The purpose of R.C. is to provide unified configuration management
 for Ruby tools.
 
-Courtier designates a single per-project configuration file, named
+R.C. designates a single per-project configuration file, named
 either `.config.rb`, `Config.rb` or `config.rb`, looked up in that 
 order. The structure of this configuration file is very simple.
 It is a ruby script sectioned into named `config` and `onload`

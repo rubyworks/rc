@@ -1,7 +1,8 @@
 # This script is for use in the RUBYOPT, e.g. RUBYOPT="-rc".
 #
-# My apologies to the author of the `c` gem, but honestly
-# I think it would be much better off that functionality
-# were provided via some other gems, e.g. the `github` gem.
+# My apologies to the author of the `c` gem. If it helps,
+# I think it would be better if the functionaility of the
+# `c` gem were provided via other gems, e.g. the `github`
+# gem.
 
-require 'courtier'
+require 'rc'
