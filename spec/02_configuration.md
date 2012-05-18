@@ -2,7 +2,7 @@
 
 The Configuration class handle evaluation of a project configuration file.
 
-   rc = RC::Configuration.new
+    rc = RC::Configuration.new
 
 We can use the `#instance_eval` method to evaluate a configuration for our
 demonstration.
