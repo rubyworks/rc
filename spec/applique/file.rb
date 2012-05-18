@@ -1,4 +1,4 @@
-require 'courtier/interface'
+require 'rc/api'
 
 When 'configuration file `(((\S+)))` containing' do |slots, text|
   RC.clear! #configurations.clear

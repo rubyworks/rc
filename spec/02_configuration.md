@@ -16,7 +16,7 @@ demonstration.
 Evaluation of a configuration file, populate the Confection.config instance.
 
     sample = rc.configurations.last
-    sample.tool     #=> 'sample1'
+    sample.command  #=> 'sample1'
     sample.profile  #=> 'default'
     sample.class    #=> RC::Config
 
@@ -31,7 +31,7 @@ a Symbol.
     HERE
 
     sample = rc.configurations.last
-    sample.tool     #=> 'sample2'
+    sample.command  #=> 'sample2'
     sample.profile  #=> 'opt1'
 
 Or it can be done by using a `profile` block.
@@ -45,7 +45,7 @@ Or it can be done by using a `profile` block.
     HERE
 
     sample = rc.configurations.last
-    sample.tool     #=> 'sample2'
+    sample.command  #=> 'sample2'
     sample.profile  #=> 'opt1'
 
 
