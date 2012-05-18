@@ -28,3 +28,8 @@ file 'qed/**/*' do
   sh 'qed'
 end
 
+file 'README.md' do
+  sh 'git add README.md'
+  sh 'git commit -m "Updated README. [doc]"'
+end
+
