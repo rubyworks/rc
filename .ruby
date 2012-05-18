@@ -1,7 +1,6 @@
 ---
 source:
 - var
-- var/
 authors:
 - name: Trans
   email: transfire@gmail.com
@@ -28,36 +27,36 @@ dependencies: []
 alternatives: []
 conflicts: []
 repositories:
-- uri: git://github.com/rubyworks/courtier.git
+- uri: git://github.com/rubyworks/rc.git
   scm: git
   name: upstream
 resources:
-- uri: http://rubyworks.github.com/courtier
-  name: home
+- uri: http://rubyworks.github.com/rc
+  label: Website
   type: home
-- uri: http://rubydoc.info/gems/courtier/frames
-  name: docs
-  type: doc
-- uri: http://github.com/rubyworks/courtier
-  name: code
+- uri: http://rubydoc.info/gems/rc/frames
+  type: docs
+- uri: http://github.com/rubyworks/rc
+  label: Source Code
   type: code
 - uri: http://groups.google.com/group/rubyworks-mailinglist
-  name: mail
+  label: Mailing List
   type: mail
 - uri: http://chat.us.freenode.net/rubyworks
-  name: chat
+  label: IRC Channel
   type: chat
+categories: []
 extra: {}
 load_path:
 - lib
 revision: 0
 created: '2011-11-06'
 summary: The best way to manage your application's configuration.
-title: Courtier
+title: R.C.
 version: 0.2.0
-name: courtier
-description: ! 'Courtier is a multi-tenant configuration system for Ruby projects.
+name: rc
+description: ! 'R.C. is a multi-tenant configuration system for Ruby projects.
 
-  Courtier can configure almost any Ruby tool or library.'
+  R.C. can configure almost any Ruby tool or library.'
 organization: Rubyworks
-date: '2012-04-28'
+date: '2012-05-18'
