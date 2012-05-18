@@ -13,8 +13,9 @@
 
 RC is a is multi-tenant runtime configuration system for Ruby tools.
 If was designed to facilitate Ruby-based configuration for multiple
-tools in a single file. It is extremely simple, and univerally applicable
-which makes it easy to understand and flexible in use.
+tools in a single file, and designed to work regardless if the tool
+has dedicated support for R.C. built-in. The syntax is simple, 
+univerally applicable and flexible in use.
 
 
 ## Installation
