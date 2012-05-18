@@ -5,16 +5,16 @@ module RC
   require 'loaded'
 
   # Internal requirements.
-  require 'courtier/core_ext'
-  require 'courtier/config'
-  require 'courtier/configuration'
-  #require 'courtier/config_filter'
-  require 'courtier/properties'
-  require 'courtier/setup'
+  require 'rc/core_ext'
+  require 'rc/config'
+  require 'rc/configuration'
+  #require 'rc/config_filter'
+  require 'rc/properties'
+  require 'rc/setup'
 
   # The Interface module extends RC module.
   #
-  # A tool can control RC configuration by loading `courtier` and calling the
+  # A tool can control RC configuration by loading `rc` and calling the
   # toplevel `court` or `RC.setup` method with a block that handles the 
   # configuration for the feature as provided by a project's config file.
   #
@@ -22,7 +22,7 @@ module RC
   # then current command. This is easy enough to do with #profile? and #command?
   # methods.
   #
-  #   require 'courtier'
+  #   require 'rc'
   #
   #   RC.setup('rspec') do |config|
   #     if config.profile?
@@ -272,7 +272,7 @@ module RC
     end
 
     #
-    # Setup courtier system.
+    # Setup rc system.
     #
     def bootstrap
       @bootstrap ||= (
