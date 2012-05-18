@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Courtier: The best way to manage tool configuration</title>
+  <title>R.C.: The best way to manage tool configuration</title>
   <link rel="icon" type="image/png" href="assets/icon.png">
 
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript"></script>
@@ -12,32 +12,42 @@
       hljs.tabReplace = '  ';
       hljs.initHighlightingOnLoad();
     });
+
+    function show_section(query) {
+      $('.document').hide();
+      $(query).fadeIn();
+    };
   </script>
   <style>
     body { font-family: times, serif; margin: 0; padding: 0; background: url(assets/bg2.png) center top repeat #fff; }
     h1 { font-size: 4em; height: 50px; padding: 0; padding-bottom: 0.5em; margin-bottom: 5px; }
     h2 { margin-top: 30px; }
     pre { padding: 10px 5px; font-size: 0.9em; font-family: monospace; background: #111; color: #fff; border-radius: 10px; }
-    a { text-decoration: none; color: #D48; }
-    a:hover { text-decoration: underline; }
+    a { text-decoration: none; color: #005; }
 
-    #main { margin: 0 auto; min-height: 800px; clear: both; background: #fdd; border-top: 2px solid #FCC; border-bottom: 2px solid #FCC;
-            padding-bottom: 40px; 
+    .document { margin: 0 auto; width: 760px; padding: 0px 20px; }
+    .document h2 { border-bottom: 0px solid #005; color: #05; padding-top: 20px; }
+
+    #main { margin: 0 auto; min-height: 800px; clear: both; background: #fff; border-top: 0px solid #FCC; border-bottom: 0px solid #FCC;
+            padding-bottom: 40px; max-width: 800px;
           }
 
-    #header { margin: 0 auto; width: 820px; text-align: center; padding: 15px 0 15px 0; background: #fff; }
-    #header .title { font-size: 150px; text-shadow: 5px 5px 10px #000; color: #A03; text-align: center; padding: 5px; }
-    #header .summary { font-size: 24px; font-style: italic; margin-top: 0px; margin-bottom: 20px; text-align: center; }
+    #header { margin: 0 auto; max-width: 820px; text-align: center; padding: 0; padding-top: 25px; }
+    #header table { width: 100%; margin: 0; padding: 0; }
+    #header table td { }
+    #header .title { font-size: 120px; line-height: 130px; text-shadow: 3px 3px 15px #000; color: #005; text-align: left; padding: 0 10px 0 10px; }
+    #header .divide { color: #ccc; font-size: 0.8em; }
+    #header .summary { font-size: 22px; font-style: italic; margin: 0; padding: 0 10px; text-align: left; text-shadow: 1px 1px 5px #eee;  }
 
-    #document { margin: 0 auto; width: 800px; padding: 0px 20px; }
-    #document h2 { border-bottom: 2px solid #000; }
+    #nav { font-size: 1.2em; text-align: left; padding: 0 10px; color: #555; font-weight: normal; }
+    #nav ul { }
+    #nav li { }
+    #nav a { font-size: 0.9em; border-radius: 5px; padding: 5px 10px; }
+    #nav a:hover { color: #fff; background: #F00; font-weight: bold; }
 
-    #nav { font-size: 1.2em; text-align: center; padding: 0 10px; color: #555; font-weight: normal; }
-    #nav a { color: #fff; font-size: 0.7em; background: #F00; border-radius: 5px; padding: 5px 10px; font-family: sans-serif; font-weight: bold; }
-
-    #blurb { padding: 20px; margin: 40px auto; width: 800px; background: #FAA; border-radius: 10px;
+    #blurb { padding: 10px; margin: 30px auto 20px auto; background: #FFF; border-radius: 0px;
              font-size: 1.2em; color: #111; text-align: justify; line-height: 1.4em;
-             font-weight: normal; font-family: sans-serif; font-style: italic; border: 3px solid #A03; }
+             font-weight: normal; font-family: sans-serif; font-style: italic; }
 
     #footer { margin: 0 auto; padding: 40px 0 20px 0; text-align: center; background: white; }
     #footer .copying { color: #333; padding: 40px; font-size: 0.8em; text-align: center; font-weight: bold; }
@@ -52,43 +62,48 @@
 <div id="header">
   <table>
     <tr>
-      <td><img src="assets/bou-right.jpg" height="160px" /></td>
+      <td style="width: 1%;"><img src="assets/bou-right.jpg" height="130px" /></td>
       <td>
-        <div class="title">Courtier</div>
-        <div class="summary">The royal approach to tool configuration</div>
+        <div class="title">R. C.</div>
+        <div class="summary">Unified Runtime Configuration</div>
       </td>
-      <td><img src="assets/bou-left.jpg" height="160px" /></td>
     </tr>
   </table>
 </div>
 
 <div id="main">
+
   <div id="blurb">
-    Courtier is a configuration management system for Ruby tools. 
-    It can configure all your tools in a single multi-tenant file.
+    R.C. is a runtime configuration management system for Ruby-based project
+    tools. It is multi-tenant, allowing multiple tools to be configured in a single Config.rb file.
+    And it is independent, tools do not have to depend on R.C. in order to be configured.
   </div>
 
-  <div id="document">
+  <div id="about" class="document">
     <h2>Finding Information</h2>
 
     <div id="nav">
-      <a href="http://github.com/rubyworks/courtier/wiki">User Manual</a> &nbsp;
-      <a href="http://rubydoc.info/gems/courtier/frames">Programming Manual</a> &nbsp;
-      <a href="http://rubydoc.info/gems/courtier/file/DEMO.md">Demonstrations</a> &nbsp;
-      <a href="http://github.com/rubyworks/courtier/issues">Support</a> &nbsp;
-      <a href="http://github.com/rubyworks/courtier">Source Code</a> &nbsp;
-      <a href="http://rubygems.org/gems/courtier">Gem Package</a> &nbsp;
+      <ul>
+      <li><a href="http://github.com/rubyworks/rc/wiki">User Manual</a></li>
+      <li><a href="http://rubydoc.info/gems/rc/frames">Programming Manual</a></li>
+      <li><a href="http://rubydoc.info/gems/rc/file/DEMO.md">Demonstrations</a></li>
+      <li><a href="http://github.com/rubyworks/rc/issues">Support</a></li>
+      <li><a href="http://github.com/rubyworks/rc">Source Code</a></li>
+      <li><a href="http://rubygems.org/gems/rc">Gem Package</a></li>
+      </ul>
     </div>
 
     <h2>Getting Started</h2>
 
-    <p>Getting started with Courtier is easy.</p>
+    <p>Getting started with R.C. is take only a few minutes. Assuming you have a typical
+       Ruby-ready system, simply install the <code>rc</code> gem.
+    </p>
 
     <pre><code>
-    $ gem install courtier
+    $ gem install rc
     </code></pre>
 
-    <p>To use Courtier for all projects, add the <code>rc</code> bootstrap feature to your systems
+    <p>To use R.C. for all projects, add the <code>rc</code> bootstrap feature to your systems
     RUBYOPT environment variable. You will want to add this to you start up scripts, depending on
     your system that will be <code>.bashrc</code> or <code>.profile</code>, or what have you.</p>
 
@@ -96,16 +111,18 @@
     $ export RUBYOPT="-rc $RUBYOPT"
     </code></pre>
 
-    <p>Alternately, you can add Courtier to your project's Gemfile, then is will work when ever
-    you use <code>bundle exec</code>.</p>
+    <p>Alternately, you can add R.C. to your project's Gemfile:</p>
 
     <pre><code>
-    gem 'courtier'
+    gem 'rc'
     </code></pre>  
 
-    <p>Now you can specify tool configurations in your project's Config.rb file.</p>
+    <p>Then is will work when ever you use <code>bundle exec</code>.</p>
+
+    <p>Now you can then specify tool configurations in a project's Config.rb file.</p>
 
     <pre><code>
+    # Config.rb
     config 'qed', profile: 'coverage' do
       require 'simplecov'
       SimpleCov.start do
@@ -115,7 +132,7 @@
     </code></pre>
  
     <div class="more">
-      <button>Learn more about writing configs...</button>
+      <button onclick="show_section('#configs');">Learn more about writing configs...</button>
     </div>
 
     <p>When the tool is run, with the coresponding profile, the configuration will be applied.</p>
@@ -125,24 +142,44 @@
     </code></pre>
 
     <p>As long as a tool is Ruby-based and has some means of global configuration, then
-    Courtier can be used to configure it.</p>
+    R.C. can be used to configure it.</p>
 
-    <p>Tool developers can add direct support for Courtier to their project's with a simple
+    <p>Tool developers can add dedicated support for R.C. to their project's with a simple
     snippet of code.</p>
 
     <pre><code>
-    require 'rc'
+    require 'rc/api'
 
     configure 'mytool' do |config|
-      MyTool.configure(&config)
+      MyTool.configure(&config) if config.profile?
     end
     </code></pre>
 
     <div class="more">
-      <button>Learn more about tool support...</button>
+      <button onclick="show_section('#tools');">Learn more about tool support...</button>
     </div>
+  </div>
+
+  <div id="configs" class="document" style="display: none;">
+    <h2>Writing Configuration</h2>
+
+    <p>Configurations are written with a very simple domain specific language.
+       Primarily the syntax consists of <code>config</code> statments with blocks
+       of code that handle the configuration. The <code>config</code> method takes
+       an the name of the command to be configured as an argument along with a
+       set of possible options.
+    </p>
+
+    <p>...</p>
 
   </div>
+
+  <div id="tools" class="document" style="display: none;">
+    <h2>Tool Support</h2>
+
+    <p>...</p>    
+  </div>
+
 </div>
 
 <div id="footer">
@@ -160,12 +197,12 @@
 
   <div class="copying">
     &copy; Rubyworks 2011 &middot;
-    <a href="http://travis-ci.org/rubyworks/courtier"><img src="http://travis-ci.org/rubyworks/courtier.png" /></a>
+    <a href="http://travis-ci.org/rubyworks/rc"><img src="http://travis-ci.org/rubyworks/rc.png" /></a>
   </div>
 </div>
 
 <div style="position: absolute; top: 0; right: 0;">
-  <a href="http://github.com/rubyworks/courtier"><img src="http://rubyworks.github.com/assets/images/fork-me.png" /></a>
+  <a href="http://github.com/rubyworks/rc"><img src="http://rubyworks.github.com/assets/images/fork-me.png" /></a>
 </div>
 
 <div id="rubyworks">
