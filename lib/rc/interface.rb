@@ -174,6 +174,9 @@ module RC
     #
     # Define a custom configuration handler.
     #
+    # If the current tool matches the given tool, and autoconfiguration is not being used,
+    # then configuration is applied immediately.
+    #
     # TODO: Not 100% sure about the method name, `#setup`. Does that really convery what
     # is happening here? Maybe `#configure` would be better? Developers, should probably
     # use `#config_handler` alias for now. We will keep that alias for the long term, 
@@ -342,8 +345,7 @@ module RC
   bootstrap  # prepare system
 end
 
-# Toplevel convenience method for `RC.configure`.
-# Configure's tool immediately.
+# Toplevel convenience method for `RC.config_handler`.
 #
 # @example
 #   configure 'qed' do |config|
@@ -351,6 +353,6 @@ end
 #   end
 #
 def self.configure(tool, options={}, &block)
-  RC.setup(tool, options, &block)
+  RC.config_handler(tool, options, &block)
 end
 
