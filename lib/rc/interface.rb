@@ -167,9 +167,10 @@ module RC
     # 
     # NOTE: This is probably a YAGNI.
     #
-    def unset(tool)
+    def unconfigure(tool)
       @setup[tool.to_s] = false
     end
+    alias :unset :unconfigure
 
     #
     # Define a custom configuration handler.
@@ -182,7 +183,7 @@ module RC
     # use `#config_handler` alias for now. We will keep that alias for the long term, 
     # regardless of what we finally decide about `#setup`.
     #
-    def setup(tool, options={}, &block)
+    def configure(tool, options={}, &block)
       tool = tool.to_s
 
       @setup ||= {}
@@ -191,7 +192,7 @@ module RC
         @setup[tool] = Setup.new(tool, options, &block)
 
         if tool == current_tool
-          configure(tool) unless autoconfig?
+          configure_tool(tool) unless autoconfig?
         end
       end     
 
@@ -199,9 +200,11 @@ module RC
     end
 
     #
-    # A more literal method name that we can keep while seek the best name for `#setup`.
+    # Original name of `#configure`.
     #
-    alias :config_handler :setup
+    def setup(tool, options={}, &block)
+      configure(tool, options, &block)
+    end
 
     #
     # Set current profile via ARGV switch. This is done immediately,
@@ -264,13 +267,13 @@ module RC
     #
     def autoconfigure
       @autoconfig = true
-      configure(current_tool)
+      configure_tool(current_tool)
     end
 
     #
     # Configure current commnad.
     #
-    def configure(tool)
+    def configure_tool(tool)
       tweak(tool)
 
       configs = RC.configuration[tool]
@@ -353,6 +356,6 @@ end
 #   end
 #
 def self.configure(tool, options={}, &block)
-  RC.config_handler(tool, options, &block)
+  RC.configure(tool, options, &block)
 end
 
