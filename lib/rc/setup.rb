@@ -1,6 +1,7 @@
 module RC
 
-  # Tool configuration setup is used to customize how a tool handles
+  #
+  # Configuration setup is used to customize how a tool handles
   # configuration.
   #
   class Setup
@@ -8,11 +9,9 @@ module RC
     #
     # Intialize new configuration setup.
     #
-    def initialize(feature, options={}, &block)
-      @feature = feature.to_s
-
-      @command = @feature
-      @command = options[:command] || options[:tool] if options.key?(:command) || options.key?(:tool)
+    def initialize(command, options={}, &block)
+      @command = command.to_s
+      #@command = options[:command] || options[:tool] if options.key?(:command) || options.key?(:tool)
 
       @profile = options[:profile] if options.key?(:profile)
 
@@ -20,16 +19,28 @@ module RC
     end
 
     #
-    # Feature for which this is the configuration setup.
+    # Command for which this is the configuration setup.
     #
-    attr :feature
+    attr :command
+
+    #
+    # Specific profile for which this is the configuration is the setup.
+    #
+    attr :profile
 
     #
     #
     #
     def call(config)
-      return unless config.command == @command.to_s if @command
-      return unless config.profile == @profile.to_s if @profile
+      return unless config.command == @command #.to_s if @command
+
+      case profile
+      when true
+        return unless RC.profile?
+      when nil, false
+      else
+        return unless config.profile == @profile.to_s #if @profile
+      end
 
       @block.call(config)
     end

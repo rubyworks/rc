@@ -163,16 +163,23 @@ module RC
     end
 
     #
-    # Deactivate courtship altogether.
+    # Remove a configuration setup.
+    # 
+    # NOTE: This is probably a YAGNI.
     #
-    def uncourt(tool)
+    def unset(tool)
       @setup[tool.to_s] = false
     end
 
     #
     # Define a custom configuration handler.
     #
-    def court(tool, options={}, &block)
+    # TODO: Not 100% sure about the method name, `#setup`. Does that really convery what
+    # is happening here? Maybe `#configure` would be better? Developers, should probably
+    # use `#config_handler` alias for now. We will keep that alias for the long term, 
+    # regardless of what we finally decide about `#setup`.
+    #
+    def setup(tool, options={}, &block)
       tool = tool.to_s
 
       @setup ||= {}
@@ -185,8 +192,13 @@ module RC
         end
       end     
 
-      @setup[tool.to_s]
+      @setup[tool]
     end
+
+    #
+    # A more literal method name that we can keep while seek the best name for `#setup`.
+    #
+    alias :config_handler :setup
 
     #
     # Set current profile via ARGV switch. This is done immediately,
@@ -253,7 +265,7 @@ module RC
     end
 
     #
-    # Copnfgure current commnad. This is used by the `rc` script.
+    # Configure current commnad.
     #
     def configure(tool)
       tweak(tool)
@@ -265,7 +277,7 @@ module RC
       configs.each do |config|
         next unless config.apply_to_tool?
         config.require_feature if autoconfig?
-        setup = RC.court(tool)
+        setup = setup(tool)
         next if setup == false  # deactivated
         setup ? setup.call(config) : config.call
       end
@@ -330,17 +342,6 @@ module RC
   bootstrap  # prepare system
 end
 
-# Toplevel convenience method for `RC.court`.
-#
-# @example
-#   court 'qed' do |config|
-#     QED.configure(config.profile, &config)
-#   end
-#
-def self.court(tool, options={}, &block)
-  RC.court(tool, options, &block)
-end
-
 # Toplevel convenience method for `RC.configure`.
 # Configure's tool immediately.
 #
@@ -350,6 +351,6 @@ end
 #   end
 #
 def self.configure(tool, options={}, &block)
-  RC.configure(tool, options, &block)
+  RC.setup(tool, options, &block)
 end
 
