@@ -178,11 +178,6 @@ module RC
     # If the current tool matches the given tool, and autoconfiguration is not being used,
     # then configuration is applied immediately.
     #
-    # TODO: Not 100% sure about the method name, `#setup`. Does that really convery what
-    # is happening here? Maybe `#configure` would be better? Developers, should probably
-    # use `#config_handler` alias for now. We will keep that alias for the long term, 
-    # regardless of what we finally decide about `#setup`.
-    #
     def configure(tool, options={}, &block)
       tool = tool.to_s
 
