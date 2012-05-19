@@ -8,30 +8,30 @@ end
 #
 # Detroit assembly.
 #
-config 'detroit' do
-  service :email do |s|
+config 'detroit' do |asm|
+  asm.service :email do |s|
     s.mailto = ['ruby-talk@ruby-lang.org', 
                 'rubyworks-mailinglist@googlegroups.com']
   end
 
-  service :gem do |s|
-    s.gemspec = 'pkg/courtier.gemspec'
+  asm.service :gem do |s|
+    s.gemspec = 'pkg/rc.gemspec'
   end
 
-  service :github do |s|
+  asm.service :github do |s|
     s.folder = 'web'
   end
 
-  service :dnote do |s|
+  asm.service :dnote do |s|
     s.title  = 'Source Notes'
     s.output = 'log/notes.html'
   end
 
-  service :locat do |s|
+  asm.service :locat do |s|
     s.output = 'log/locat.html'
   end
 
-  service :vclog do |s|
+  asm.service :vclog do |s|
     s.output = ['log/history.html',
                 'log/changes.html']
   end
