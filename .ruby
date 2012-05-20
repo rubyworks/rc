@@ -35,6 +35,7 @@ resources:
   label: Website
   type: home
 - uri: http://rubydoc.info/gems/rc/frames
+  label: Documentation
   type: docs
 - uri: http://github.com/rubyworks/rc
   label: Source Code
@@ -59,4 +60,4 @@ description: ! 'R.C. is a multi-tenant configuration system for Ruby projects.
 
   R.C. can configure almost any Ruby tool or library.'
 organization: Rubyworks
-date: '2012-05-18'
+date: '2012-05-19'
