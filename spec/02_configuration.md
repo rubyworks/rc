@@ -25,7 +25,7 @@ for a single tool. This can be done by setting the second argument to
 a Symbol.
 
     rc.evaluate(<<-HERE)
-      config :sample2, profile: 'opt1' do
+      config :sample2, :profile=>'opt1' do
         "block code"
       end
     HERE

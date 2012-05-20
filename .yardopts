@@ -2,7 +2,7 @@
 --readme README.rdoc
 --protected
 --private
-lib/**/*.rb
+lib
 -
 [A-Z]*.*
 
