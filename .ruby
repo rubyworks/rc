@@ -53,7 +53,7 @@ load_path:
 revision: 0
 created: '2011-11-06'
 summary: The best way to manage your application's configuration.
-title: R.C.
+title: RC
 version: 0.2.0
 name: rc
 description: ! 'R.C. is a multi-tenant configuration system for Ruby projects.
