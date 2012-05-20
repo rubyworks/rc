@@ -7,7 +7,8 @@ Basically, just read the README to see what is new.
 
 Changes:
 
-* Add support require-based configuration.
+* Add support for require-based configuration.
+* Overhaul and drastically simplify design.
 
 
 ## 0.1.1 | 2012-04-09
