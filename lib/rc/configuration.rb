@@ -11,38 +11,32 @@ module RC
     include Enumerable
 
     #
-    # Configuration file pattern. The standard configuration file name is
-    # `Config.rb`, and that name should be used in most cases. However, 
-    # `.config.rb` can also be use and will take precedence if found.
-    # Conversely, `config.rb` (lowercase form) can also be used but has
-    # the least precedence.
+    # Runtime configuration file glob pattern. The standard configuration file
+    # name is `.rc` or `RC.rb`, in that order of precedence. There are not
+    # case sensitive, but the cases given are typical. The `.rb` suffix
+    # is optional in both cases, and the suffix `file` can be use too, e.g.
+    # `RCfile`, but is not recommended.
     #
-    # Config files looked for in the order or precedence:
+    # A directory can be used instead named either `rc` or `.rc`, again
+    # case insensitive. In this case all the files with the directory will
+    # loaded.
     #
-    #   * `.config.rb` or `.confile.rb`
-    #   * `Config.rb`  or `Confile.rb`
-    #   * `config.rb`  or `confile.rb`
+    # TODO: Ok, maybe that is too many choices for rc file name, but
+    # it is hard to settle on a smaller set. If you think some should go
+    # please come argue with us about what's best.
     #
-    # The `.rb` suffix is optional for `confile` variations, but recommended.
-    # It is not optional for `config` b/c very old version of setup.rb script
-    # still in use by some projects use `.config` for it's own purposes.
-    #
-    # TODO: Yes, there are really too many choices for config file name, but
-    # we haven't been able to settle on a smaller list just yet. Please come
-    # argue with us about what's best.
-    #
-    CONFIG_FILE = '{.c,C,c}onfi{g.rb,le.rb,le}'
+    CONFIG_FILE = '{.,}rc{file,}{,.rb}'
 
     #
     # Standard directory glob for runtime config files. TODO: (ctrl instead?)
     #
-    CONFIG_GLOB = 'rc/**/*'
+    CONFIG_DIR = '{.,}rc/'
 
     #
-    # When looking up config file, it one of these is found
-    # then there is no point to looking further.
+    # Looking for a config file relative to root of a project,
+    # these are the files considered to indicate the root directory.
     #
-    ROOT_INDICATORS = %w{.git .hg _darcs .index .ruby}
+    ROOT_INDICATORS = %w{.git .hg _darcs .index .rc .ruby}
 
     #
     # Load configuration file from local project or other gem.
@@ -53,14 +47,28 @@ module RC
     #   Name of gem or library.
     #
     def self.load(options={})
+      from = options[:from]
+
       paths = []
-      if from = options[:from]
-        paths.push   Find.path(CONFIG_FILE, :from=>from).first
-        paths.concat Find.path(CONFIG_GLOB, :from=>from)
+
+      if from
+        file = Find.path(CONFIG_FILE, :from=>from).find{ |f| File.file?(f) }
+        if file
+          paths << file
+        else
+          dir = Find.path(CONFIG_DIR, :from=>from).first
+          paths.concat Dir.glob(File.join(dir, '**/*'), File::FNM_CASEFOLD) if dir
+        end
       else
         if root = lookup_root
-          paths.push   Dir.glob(File.join(root, CONFIG_FILE)).first
-          paths.concat Dir.glob(File.join(root, CONFIG_GLOB))
+          glob = File.join(root, CONFIG_FILE)
+          file = Dir.glob(glob, File::FNM_CASEFOLD).find{ |f| File.file?(f) }
+          if file
+            paths << file
+          else
+            dir = Dir.glob(File.join(root, CONFIG_DIR), File::FNM_CASEFOLD).first
+            paths.concat Dir.glob(File.join(dir, '**/*')) if dir
+          end
         end
       end
 
@@ -93,6 +101,40 @@ module RC
       #  raise e if $DEBUG
       #  warn e.message
       #end
+    end
+
+    #
+    # Import other runtime configuration files.
+    #
+    # @param [String] glob
+    #   File pattern of configutation files to load.
+    #
+    def import(glob, opts={})
+      paths = []
+
+      glob = glob + '**/*' if glob.end_with?('/')
+
+      if from = opts[:from]
+        paths = Find.path(glob, :from=>from)
+      else
+        if glob.start_with?('/')
+          if root = lookup_root
+            glob = File.join(root, glob)
+          else
+            raise "no project root for #{glob}" unless root
+          end
+        end
+        paths = Dir.glob(glob)
+      end
+
+      paths = paths[0..0] if opts[:first]
+
+      paths.each do |path|
+        next unless File.file?(path)
+        load_file(path)
+      end
+
+      paths.empty? ? nil : paths
     end
 
     #
@@ -316,6 +358,11 @@ module RC
       def initialize(configuration)
         @configuration = configuration
         @_options = {}
+      end
+
+      #
+      def import(glob, opts={})
+        @configuration.import(glob, *opts)
       end
 
       #

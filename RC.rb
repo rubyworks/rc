@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+import 'rc/**/*'
+
 config 'pry' do
   puts "RC on Pry!"
   $LOAD_PATH.unshift('lib')
