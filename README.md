@@ -9,16 +9,16 @@
 ## About
 
 RC is a is multi-tenant runtime configuration system for Ruby tools.
-If is designed to facilitate Ruby-based configuration for multiple
+It is designed to facilitate Ruby-based configuration for multiple
 tools in a single file, and designed to work whether the tool
-has built-in support for RC or not. The syntax is simple, univerally
+has built-in support for RC or not. The syntax is simple, universally
 applicable, yet flexible.
 
 
 ## Installation
 
-To use RC via tools that support RC directly, there is nothing you need to
-install. Installing the said tool should install `rc` via a dependency and
+To use RC with tools that support RC directly, there is likely nothing to
+install. Installing the tool should install `rc` via a dependency and
 load runtime configurations when the tool is used.
 
 To use RC with a tool that does not provide built-in support, first install
@@ -31,7 +31,7 @@ Then add `-rc` to your system's `RUBYOPT` environment variable.
     $ export RUBYOPT='-rc'
 
 You will want to add that to your `.bashrc`, `.profile` or equivalent configuration
-script, so it alwasy available.
+script, so it always available.
 
 
 ## Instruction
@@ -119,9 +119,9 @@ purpose fitting the tool. Consult the tool's documentation for details.
 
 ## Qualifications
 
-RC can be used with any Ruby-based commandline tool and there exists some
-means of configuring the tool via a toplevel/global interface, or the tool
-has been desinged to directly support RC.
+RC can be used with any Ruby-based commandline tool or library where there exists
+some means of configuring it via a toplevel/global interface, or the tool
+has been designed to directly support RC, of course.
 
 
 ## Customization
@@ -132,13 +132,13 @@ the `detroit` project defines:
 
     require 'rc/api'
 
-    configure 'detroit' do |config|
+    RC.configure 'detroit' do |config|
       if config.command?
         Detroit.rc_config << config
       end
     end
 
-In our example, `detroit` is required this configuration will be proccessed.
+In our example, `detroit` is required this configuration will be processed.
 The `if config.command?` condition ensures that it only happens if the config's
 `command` property matches the current command, i.e. `$0 == 'detroit'`. We can
 see that Detroit stores the configuration for later us. When Detroit gets
@@ -184,7 +184,7 @@ Please head over to Ruby Issue Tracker and add your support.
 
 ## Release Notes
 
-Please see HISTORY.rdoc file.
+Please see HISTORY.md file.
 
 
 ## Copyrights
