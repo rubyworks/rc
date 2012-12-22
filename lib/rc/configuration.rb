@@ -12,14 +12,10 @@ module RC
 
     #
     # Runtime configuration file glob pattern. The standard configuration file
-    # name is `.rc` or `RC.rb`, in that order of precedence. There are not
-    # case sensitive, but the cases given are typical. The `.rb` suffix
+    # name is `.rc` or `RC.rb`, in that order of precedence. These are not
+    # case sensitive, but these cases are typical. The `.rb` suffix
     # is optional in both cases, and the suffix `file` can be use too, e.g.
     # `RCfile`, but is not recommended.
-    #
-    # A directory can be used instead named either `rc` or `.rc`, again
-    # case insensitive. In this case all the files with the directory will
-    # loaded.
     #
     # TODO: Ok, maybe that is too many choices for rc file name, but
     # it is hard to settle on a smaller set. If you think some should go
@@ -28,9 +24,11 @@ module RC
     CONFIG_FILE = '{.,}rc{file,}{,.rb}'
 
     #
-    # Standard directory glob for runtime config files. TODO: (ctrl instead?)
+    # A directory can be used instead of a file, named either `.rc` or `rc`,
+    # again case insensitive. When a directory is used all the files within
+    # the directory are loaded.
     #
-    CONFIG_DIR = '{.,}rc/'
+    CONFIG_DIR = '{.,}rc/**/*'
 
     #
     # Looking for a config file relative to root of a project,
@@ -38,28 +36,48 @@ module RC
     #
     ROOT_INDICATORS = %w{.git .hg _darcs .index .rc .ruby}
 
-    #
-    # Load configuration file from local project or other gem.
-    #
-    # @param options [Hash] Load options.
-    #
-    # @option options [String] :from
-    #   Name of gem or library.
-    #
-    def self.load(options={})
-      from = options[:from]
-
-      paths = []
-
-      if from
-        file = Find.path(CONFIG_FILE, :from=>from).find{ |f| File.file?(f) }
-        if file
-          paths << file
+    class << self
+      #
+      # Load configuration file from local project or other gem.
+      #
+      # @param options [Hash] Load options.
+      #
+      # @option options [String] :from
+      #   Name of gem or library.
+      #
+      def load(options={})
+        if options[:from]
+          load_from(options[:from])
         else
-          dir = Find.path(CONFIG_DIR, :from=>from).first
-          paths.concat Dir.glob(File.join(dir, '**/*'), File::FNM_CASEFOLD) if dir
+          load_local()
         end
-      else
+      end
+
+      #
+      # Load configuration from another gem.
+      #
+      # TODO: Make sure Find.path is case insensitive.
+      #
+      def load_from(gem)
+        file = Find.path(CONFIG_FILE, :from=>from).find{ |f| File.file?(f) }
+
+        if file
+          paths = [file]
+        else
+          paths = Find.path(CONFIG_DIR, :from=>from)
+        end
+
+        files = paths.select{ |path| File.file?(path) }
+
+        new(*files)
+      end
+
+      #
+      # Load configuration for current project.
+      #
+      def load_local()
+        paths = []
+
         if root = lookup_root
           glob = File.join(root, CONFIG_FILE)
           file = Dir.glob(glob, File::FNM_CASEFOLD).find{ |f| File.file?(f) }
@@ -70,37 +88,26 @@ module RC
             paths.concat Dir.glob(File.join(dir, '**/*')) if dir
           end
         end
+
+        files = paths.select{ |path| File.file?(path) }
+
+        new(*files)
       end
-
-      conf = new
-
-      paths.each do |path|
-        next unless File.file?(path)
-        conf.load_file(path)
-      end
-
-      return conf
     end
 
     #
     # Initialize new Configuration object.
     #
-    # @param [String] file
-    #   Configuration file (optional).
+    # @param [Array<String>] files
+    #   Configuration files (optional).
     #
-    def initialize() #*paths)
-      #@file = file
+    def initialize(*files)
+      @files = files
 
       @_config = Hash.new{ |h,k| h[k]=[] }
       #@_onload = Hash.new{ |h,k| h[k]=[] }
 
-      #begin
-      #  dsl = DSL.new(self)
-      #  dsl.instance_eval(File.read(file), file) if file      
-      #rescue => e
-      #  raise e if $DEBUG
-      #  warn e.message
-      #end
+      load_files(*files)
     end
 
     #
@@ -108,6 +115,14 @@ module RC
     #
     # @param [String] glob
     #   File pattern of configutation files to load.
+    #
+    # @param opts [Hash] Load options.
+    #
+    # @option opts [String] :from
+    #   Name of gem or library.
+    #
+    # @option opts [Boolean] :first
+    #   Only match a single file.
     #
     def import(glob, opts={})
       paths = []
@@ -127,26 +142,43 @@ module RC
         paths = Dir.glob(glob)
       end
 
+      paths = paths.select{ |path| File.file?(path) }
       paths = paths[0..0] if opts[:first]
 
-      paths.each do |path|
-        next unless File.file?(path)
-        load_file(path)
-      end
+      load_files(*paths)
 
       paths.empty? ? nil : paths
     end
 
     #
-    def load_file(file)
+    # Load configuration files.
+    #
+    # TODO: begin/rescue around instance_eval?
+    #
+    def load_files(*files)
       dsl = DSL.new(self)
-      dsl.instance_eval(File.read(file), file)
+      files.each do |file|
+        next unless File.file?(file)  # TODO: warn ?
+        #begin
+          dsl.instance_eval(File.read(file), file)
+        #rescue => e
+        #  raise e if $DEBUG
+        #  warn e.message
+        #end
+      end
     end
 
+    alias :load_file :load_files
+
     #
-    def evaluate(*args, &block)
+    # Evaluate configuration code.
+    #
+    # @yieldparm config
+    #   Configuration code block.
+    #
+    def evaluate(*args, &config)
       dsl = DSL.new(self)
-      dsl.instance_eval(*args, &block)
+      dsl.instance_eval(*args, &config)
     end
 
     #

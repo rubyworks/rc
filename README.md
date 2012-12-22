@@ -1,4 +1,4 @@
-# R.C.
+# R C - Runtime Configuration
 
 [Homepage](http://rubyworks.github.com/rc) /
 [Source Code](http://github.com/rubyworks/rc) /
