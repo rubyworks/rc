@@ -301,12 +301,14 @@ module RC
     # Override require.
     #
     def bootstrap_require
-      def Kernel.required(feature)
-        config = RC.configuration[feature]
-        if config
-          config.each do |config|
-            next unless config.apply_to_feature?
-            config.call
+      def Kernel.loaded(feature, options={})
+        if options[:require]
+          config = RC.configuration[feature]
+          if config
+            config.each do |config|
+              next unless config.apply_to_feature?
+              config.call
+            end
           end
         end
         super(feature) if defined?(super)
