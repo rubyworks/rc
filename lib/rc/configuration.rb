@@ -34,10 +34,15 @@ module RC
     CONFIG_FILE = '{.c,C,c}onfi{g.rb,le.rb,le}'
 
     #
+    # Standard directory glob for runtime config files. TODO: (ctrl instead?)
+    #
+    CONFIG_GLOB = 'rc/**/*'
+
+    #
     # When looking up config file, it one of these is found
     # then there is no point to looking further.
     #
-    ROOT_INDICATORS = %w{.git .hg _darcs .ruby}
+    ROOT_INDICATORS = %w{.git .hg _darcs .index .ruby}
 
     #
     # Load configuration file from local project or other gem.
@@ -48,12 +53,25 @@ module RC
     #   Name of gem or library.
     #
     def self.load(options={})
+      paths = []
       if from = options[:from]
-        file = Find.path(CONFIG_FILE, :from=>from).first
+        paths.push   Find.path(CONFIG_FILE, :from=>from).first
+        paths.concat Find.path(CONFIG_GLOB, :from=>from)
       else
-        file = lookup(CONFIG_FILE)
+        if root = lookup_root
+          paths.push   Dir.glob(File.join(root, CONFIG_FILE)).first
+          paths.concat Dir.glob(File.join(root, CONFIG_GLOB))
+        end
       end
-      new(file)
+
+      conf = new
+
+      paths.each do |path|
+        next unless File.file?(path)
+        conf.load_file(path)
+      end
+
+      return conf
     end
 
     #
@@ -62,20 +80,25 @@ module RC
     # @param [String] file
     #   Configuration file (optional).
     #
-    def initialize(file=nil)
-      @file = file
+    def initialize() #*paths)
+      #@file = file
 
       @_config = Hash.new{ |h,k| h[k]=[] }
       #@_onload = Hash.new{ |h,k| h[k]=[] }
 
-      # TODO: does this rescue make sense here?
-      begin
-        dsl = DSL.new(self)
-        dsl.instance_eval(File.read(file), file) if file      
-      rescue => e
-        raise e if $DEBUG
-        warn e.message
-      end
+      #begin
+      #  dsl = DSL.new(self)
+      #  dsl.instance_eval(File.read(file), file) if file      
+      #rescue => e
+      #  raise e if $DEBUG
+      #  warn e.message
+      #end
+    end
+
+    #
+    def load_file(file)
+      dsl = DSL.new(self)
+      dsl.instance_eval(File.read(file), file)
     end
 
     #
@@ -231,6 +254,19 @@ module RC
         pwd = File.dirname(pwd)
       end
       return nil   
+    end
+
+    #
+    # Search upward from working directory.
+    #
+    def self.lookup_root
+      pwd  = File.expand_path(Dir.pwd)
+      home = File.expand_path('~')
+      while pwd != '/' && pwd != home
+        return pwd if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
+        pwd = File.dirname(pwd)
+      end
+      return nil
     end
 
     # TODO: other import options such as local file?

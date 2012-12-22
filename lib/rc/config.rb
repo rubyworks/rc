@@ -89,7 +89,7 @@ module RC
     end
 
     #
-    # Most configuration are scripted. In thos cases the 
+    # Most configurations are scripted. In those cases the 
     # `@block` attributes holds the Proc instance, otherwise
     # it is `nil`.
     #
