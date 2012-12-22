@@ -1,12 +1,9 @@
 # R C - Runtime Configuration
 
 [Homepage](http://rubyworks.github.com/rc) /
-[Source Code](http://github.com/rubyworks/rc) /
 [Report Issue](http://github.com/rubyworks/rc/issues) /
-[Mailing List](http://googlegroups.com/group/rubyworks-mailinglist) /
-[IRC Channel](http://chat.us.freenode.net/rubyworks)
-
-[![Build Status](https://secure.travis-ci.org/rubyworks/rc.png)](http://travis-ci.org/rubyworks/rc)
+[Source Code](http://github.com/rubyworks/rc)
+( [![Build Status](https://secure.travis-ci.org/rubyworks/rc.png)](http://travis-ci.org/rubyworks/rc) )
 
 
 ## About
