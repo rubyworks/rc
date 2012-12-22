@@ -55,7 +55,7 @@ copyrights:
 created: '2011-11-06'
 summary: The best way to manage your application's configuration.
 title: RC
-version: 0.2.0
+version: 0.3.0
 name: rc
 description: ! 'R.C. is a multi-tenant configuration system for Ruby projects.
 
