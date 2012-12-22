@@ -28,7 +28,7 @@ module RC
     # again case insensitive. When a directory is used all the files within
     # the directory are loaded.
     #
-    CONFIG_DIR = '{.,}rc/**/*'
+    CONFIG_DIR = '{.,}rc'
 
     #
     # Looking for a config file relative to root of a project,
@@ -59,12 +59,12 @@ module RC
       # TODO: Make sure Find.path is case insensitive.
       #
       def load_from(gem)
-        file = Find.path(CONFIG_FILE, :from=>from).find{ |f| File.file?(f) }
+        file = Find.path(CONFIG_FILE, :from=>gem).find{ |f| File.file?(f) }
 
         if file
           paths = [file]
         else
-          paths = Find.path(CONFIG_DIR, :from=>from)
+          paths = Find.path(CONFIG_DIR + '/**/*', :from=>gem)
         end
 
         files = paths.select{ |path| File.file?(path) }
@@ -76,23 +76,61 @@ module RC
       # Load configuration for current project.
       #
       def load_local()
-        paths = []
+        file = lookup(CONFIG_FILE, File::FNM_CASEFOLD).find{ |f| File.file?(f) }
 
-        if root = lookup_root
-          glob = File.join(root, CONFIG_FILE)
-          file = Dir.glob(glob, File::FNM_CASEFOLD).find{ |f| File.file?(f) }
-          if file
-            paths << file
-          else
-            dir = Dir.glob(File.join(root, CONFIG_DIR), File::FNM_CASEFOLD).first
-            paths.concat Dir.glob(File.join(dir, '**/*')) if dir
-          end
+        if file
+          paths = [file]
+        else
+          dir = lookup(CONFIG_DIR).find{ |f| File.directory?(f) }
+          paths = dir ? Dir.glob(File.join(dir, '**/*')) : []
         end
+
+        #if root = lookup_root
+        #  glob = File.join(root, CONFIG_FILE)
+        #  file = Dir.glob(glob, File::FNM_CASEFOLD).find{ |f| File.file?(f) }
+        #  if file
+        #    paths << file
+        #  else
+        #    dir = Dir.glob(File.join(root, CONFIG_DIR), File::FNM_CASEFOLD).first
+        #    paths.concat Dir.glob(File.join(dir, '**/*')) if dir
+        #  end
+        #end
 
         files = paths.select{ |path| File.file?(path) }
 
         new(*files)
       end
+
+    private
+
+      #
+      # Search upward from working directory.
+      #
+      def lookup(glob, flags=0)
+        pwd  = File.expand_path(Dir.pwd)
+        home = File.expand_path('~')
+        while pwd != '/' && pwd != home
+          paths = Dir.glob(File.join(pwd, glob), flags)
+          return paths unless paths.empty?
+          break if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
+          pwd = File.dirname(pwd)
+        end
+        return nil
+      end
+
+      #
+      # Search upward from working directory.
+      #
+      def lookup_root
+        pwd  = File.expand_path(Dir.pwd)
+        home = File.expand_path('~')
+        while pwd != '/' && pwd != home
+          return pwd if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
+          pwd = File.dirname(pwd)
+        end
+        return nil
+      end
+
     end
 
     #
@@ -173,12 +211,12 @@ module RC
     #
     # Evaluate configuration code.
     #
-    # @yieldparm config
+    # @yieldparm cfg
     #   Configuration code block.
     #
-    def evaluate(*args, &config)
+    def evaluate(*args, &cfg)
       dsl = DSL.new(self)
-      dsl.instance_eval(*args, &config)
+      dsl.instance_eval(*args, &cfg)
     end
 
     #
@@ -313,35 +351,6 @@ module RC
     #end
 
   private
-
-    #
-    # Search upward from working directory.
-    #
-    def self.lookup(glob, flags=0)
-      pwd  = File.expand_path(Dir.pwd)
-      home = File.expand_path('~')
-      while pwd != '/' && pwd != home
-        if file = Dir.glob(File.join(pwd, glob), flags).first
-          return file
-        end
-        break if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
-        pwd = File.dirname(pwd)
-      end
-      return nil   
-    end
-
-    #
-    # Search upward from working directory.
-    #
-    def self.lookup_root
-      pwd  = File.expand_path(Dir.pwd)
-      home = File.expand_path('~')
-      while pwd != '/' && pwd != home
-        return pwd if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
-        pwd = File.dirname(pwd)
-      end
-      return nil
-    end
 
     # TODO: other import options such as local file?
 

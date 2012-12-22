@@ -3,7 +3,7 @@
 The main means of workin with RC's API are the RC class methods,
 collectively called the Inteface.
 
-Let's say we have a configuration file `config.rb` containing:
+Let's say we have a configuration file `rc.rb` containing:
 
     config :example do
       "example config"
