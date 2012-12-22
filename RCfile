@@ -59,10 +59,6 @@ config 'qed', profile: 'cov' do
   end
 end
 
-config 'qed' do
-  puts "QED!"
-end
-
 #
 # Rake tasks 
 #
