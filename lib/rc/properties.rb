@@ -11,7 +11,7 @@ module RC
     #
     #
     #
-    DATA_FILE = '.ruby'
+    DATA_FILE = '.index'
 
     #
     #
@@ -20,7 +20,11 @@ module RC
       @data = {}
 
       if file = Dir[DATA_FILE].first
-        @data.update(YAML.load_file(file))
+        begin
+          data = YAML.load_file(file)
+          @data.update(data)
+        rescue SyntaxError
+        end
       end
     end
 
