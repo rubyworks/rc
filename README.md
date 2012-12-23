@@ -138,12 +138,12 @@ the `detroit` project defines:
       end
     end
 
-In our example, `detroit` is required this configuration will be processed.
+In our example, when `detroit` is required this configuration will be processed.
 The `if config.command?` condition ensures that it only happens if the config's
-`command` property matches the current command, i.e. `$0 == 'detroit'`. We can
-see that Detroit stores the configuration for later us. When Detroit gets
+`command` property matches the current command, i.e. `$0 == 'detroit'`. We see
+here that Detroit stores the configuration for later use. When Detroit gets
 around to doing it's thing, it checks this `rc_config` setting and evaluates
-the configurations found there as befits Detroit's own domain language.
+the configurations found there.
 
 It is important that RC be required first, ideally before anything else. This
 ensures it will pick up all configured features.
