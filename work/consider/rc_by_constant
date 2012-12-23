@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
 
-# If we do this in a BlankObject context we could control it all.
+# If we do this in a BasicObject context we could control it all.
 #
 # So in this case the criteria would be that there were a require `foo`
-# for a given `Foo` module, which go with a `foo` command.
+# for a given `Foo` module, which goes with a `foo` command.
+#
+# See issue #1.
 
 module NULL
   extend self
