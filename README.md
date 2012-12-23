@@ -14,6 +14,10 @@ tools in a single file, and designed to work whether the tool
 has built-in support for RC or not. The syntax is simple, universally
 applicable, yet flexible.
 
+RC can be used with any Ruby-based commandline tool or library utilized by
+such tool, where there exists some means of configuring it via a toplevel/global
+interface; or the tool has been designed to directly support RC, of course.
+
 
 ## Installation
 
@@ -115,13 +119,6 @@ line option for specifying the profile.
 
 Beyond mere namespacing, some tools might utilize profiles for a more specific
 purpose fitting the tool. Consult the tool's documentation for details.
-
-
-## Qualifications
-
-RC can be used with any Ruby-based commandline tool or library where there exists
-some means of configuring it via a toplevel/global interface, or the tool
-has been designed to directly support RC, of course.
 
 
 ## Customization
