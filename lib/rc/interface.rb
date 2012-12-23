@@ -1,11 +1,13 @@
 module RC
+
   # External requirements.
   require 'yaml'
   require 'finder'
-  require 'loaded'
+  #require 'loaded'
 
   # Internal requirements.
   require 'rc/constants'
+  require 'rc/required'
   require 'rc/core_ext'
   require 'rc/config'
   require 'rc/configuration'
@@ -243,7 +245,7 @@ module RC
       @autoconfigure
     end
 
-  private
+  protected
 
     #
     #
@@ -252,6 +254,8 @@ module RC
       @autoconfig = true
       configure_tool(current_tool)
     end
+
+  private
 
     #
     # Configure current commnad.
@@ -288,14 +292,12 @@ module RC
     # triggered on #require, not #load.
     #
     def bootstrap_require
-      def Kernel.loaded(feature, options={})
-        if options[:require]
-          config = RC.configuration[feature]
-          if config
-            config.each do |config|
-              next unless config.apply_to_feature?
-              config.call
-            end
+      def Kernel.required(feature)
+        config = RC.configuration[feature]
+        if config
+          config.each do |config|
+            next unless config.apply_to_feature?
+            config.call
           end
         end
         super(feature) if defined?(super)

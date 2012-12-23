@@ -22,12 +22,14 @@ module RC
     #
     # Root directory of project.
     #
+    # @return [String] Full path to project's root directory.
+    #
     def root
       @root
     end
 
     #
-    #
+    # Route missing method to index lookup and failing that var file lookup.
     #
     def method_missing(s)
       name = s.to_s.downcase

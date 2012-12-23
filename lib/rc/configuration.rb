@@ -11,17 +11,20 @@ module RC
     include Enumerable
 
     #
-    # Runtime configuration file glob pattern. The standard configuration file
-    # name is `.rc` or `RC.rb`, in that order of precedence. These are not
-    # case sensitive, but these cases are typical. The `.rb` suffix
-    # is optional in both cases, and the suffix `file` can be use too, e.g.
-    # `RCfile`, but is not recommended.
+    # Runtime configuration file glob pattern. The standard configuration
+    # file name is `.rc` or `RC.rb`. These are not case sensitive, but these
+    # cases are typical. The `.rb` suffix is optional in either case, and
+    # the a `file` suffix can be use too, e.g. `RCfile`, if you are into 
+    # that whole "Foofile" thing.
     #
-    # TODO: Ok, maybe that is too many choices for rc file name, but
-    # it is hard to settle on a smaller set. If you think some should go
-    # please come argue with us about what's best.
+    # TODO: Ok, maybe that is too many choices for rc file name, but it is
+    # hard to settle on a smaller set. If you think some should be removed
+    # please come argue with us about what's best. Honestly I am half inclined
+    # to  make it `.rc` or `.rc.rb` period, and anything else one'd like to use,
+    # would route through that with `import "RCfile"` or whatever.
     #
-    CONFIG_FILE = '{.,}rc{file,}{,.rb}'
+    CONFIG_FILE = '{.,}{rc,Rc,RC}{file,}{,.rb}'
+    #CONFIG_FILE = '{.rc,.rc.rb,RC.rb,Rc.rb,rc.rb,RCfile,Rcfile,rcfile,RCfile.rb,Rcfile.rb,rcfile.rb}'
 
     #
     # A directory can be used instead of a file, named either `.rc` or `rc`,
@@ -50,7 +53,7 @@ module RC
       #
       # Load configuration from another gem.
       #
-      # TODO: Make sure Find.path is case insensitive.
+      # TODO: Make sure Find.path is case insensitive for the file.
       #
       def load_from(gem)
         file = Find.path(CONFIG_FILE, :from=>gem).find{ |f| File.file?(f) }
@@ -411,7 +414,9 @@ module RC
         original_state = @_options.dup
         @_options.update(state)
         @_options[:profile] = name.to_s
+
         instance_eval(&block)
+
         @_options = original_state
       end
 
@@ -422,6 +427,7 @@ module RC
         raise ArgumentError, "nested #{nested_keys.join(', ')}" unless nested_keys.empty?
 
         options = @_options.merge(options)
+
         @configuration.config(command, options, &block)
       end
 
@@ -433,6 +439,7 @@ module RC
 
         options = @_options.merge(options)
         options[:onload] = true
+
         @configuration.config(feature, options, &block)
       end
 

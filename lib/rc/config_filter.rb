@@ -1,13 +1,19 @@
 module RC
 
+  # To be quite honest I have forgotten the purpose of this class
+  # and it is no longer being used, so it should be deleted. But
+  # I am holding off a bit, in case I recall why it was here, in
+  # order to be sure.
   #
   class ConfigFilter
+
     include Enumerable
 
     #
     # Initialize new ConfigFilter.
     #
-    # @param [Array<Config>] List if Config instances.
+    # @param [Array<Config>] configuration
+    #   List if Config instances.
     #
     def initialize(configuration, criteria={})
       @configuration = configuration
