@@ -1,26 +1,22 @@
 module RC
 
-  # Project properties.
+  # Project properties make it easy for configurations to utilize
+  # information about a project for config settings. Properties
+  # are stored in a global variables called `$properties`.
   #
-  # Currently properties derive from a project's .index file,
-  # if it has one. This will be expanded upon in future version
-  # to allow sources, such as a gemspec.
+  #   $properties.name #=> 'rc'
+  #
+  # Properties derive from a project's `.index` file and `var/` files.
+  # This may expand in the future to include a project's gemspec.
   #
   class Properties
 
     #
-    #
-    #
-    DATA_FILE = '.index'
-
-    #
-    #
+    # Initialize new Properties instance.
     #
     def initialize(path=nil)
-      @data = {}
-      @root = find_root(path || Dir.pwd)
-
-      load_index
+      @root  = find_root(path || Dir.pwd)
+      @index = load_index
     end
 
     #
@@ -34,7 +30,8 @@ module RC
     #
     #
     def method_missing(s)
-      @data[s.to_s]
+      name = s.to_s.downcase
+      index(name) || var(name)
     end
 
   private
@@ -57,16 +54,43 @@ module RC
     #
     #
     #
+    def index(name)
+      @index[name]
+    end
+
+    #
+    #
+    #
+    def var(name)
+      return @var[name] if @var.key?(name)
+
+      glob = File.join(root, 'var', name)
+      file = Dir[glob].first
+      if file
+        data = File.read(file)
+        if data =~ /\A(---|%YAML)/
+          data = YAML.load(data)
+        end
+        @var[name] = data
+      else
+        nil
+      end
+    end
+
+    #
+    #
+    #
     def load_index
+      index = {}
       file = File.join(root, '.index')
       if File.exist?(file)
         begin
-          data = YAML.load_file(file)
-          @data.update(data)
+          index = YAML.load_file(file)
         rescue SyntaxError => error
           warn error.to_s
         end
       end
+      index
     end
 
     #
