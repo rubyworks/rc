@@ -5,6 +5,7 @@ module RC
   require 'loaded'
 
   # Internal requirements.
+  require 'rc/constants'
   require 'rc/core_ext'
   require 'rc/config'
   require 'rc/configuration'
@@ -12,44 +13,28 @@ module RC
   require 'rc/properties'
   require 'rc/setup'
 
-  # The Interface module extends RC module.
+  # The Interface module extends the RC module.
   #
-  # A tool can control RC configuration by loading `rc` and calling the
-  # toplevel `court` or `RC.setup` method with a block that handles the 
-  # configuration for the feature as provided by a project's config file.
+  # A tool can control RC configuration by loading `rc/api` and calling the
+  # `RC.configure` method with a block that handles the configuration
+  # for the feature as provided by a project's config file.
   #
   # The block will often need to be conditioned on the current profile and/or the
-  # then current command. This is easy enough to do with #profile? and #command?
+  # the current command. This is easy enough to do with #profile? and #command?
   # methods.
   #
-  #   require 'rc'
+  # For example, is RSpec wanted to support RC out-of-the-box, the code would
+  # look something like:
   #
-  #   RC.setup('rspec') do |config|
+  #   require 'rc/api'
+  #
+  #   RC.configure('rspec') do |config|
   #     if config.profile?
   #       RSpec.configure(&config)
   #     end
   #   end
   #
   module Interface
-
-    #
-    # Configuration file pattern. The standard configuration file name is
-    # `Config.rb`, and that name should be used in most cases. However, 
-    # `.config.rb` can also be use and will take precedence if found.
-    # Conversely, `config.rb` (lowercase form) can also be used but has
-    # the least precedence.
-    #
-    # Config files looked for in the order or precedence:
-    #
-    #   * `.config.rb` or `.confile.rb`
-    #   * `Config.rb`  or `Confile.rb`
-    #   * `config.rb`  or `confile.rb`
-    #
-    # Yes, there are really too many choices here, but we haven't been able
-    # to settle on a smaller list just yet. Please come argue with us about
-    # what's best.
-    #
-    FILE_PATTERN = '{.c,C,c}on{fig.rb,file,file.rb}'
 
     #
     # The tweaks directory is where special augementation script reside
@@ -61,6 +46,8 @@ module RC
     #
     # Library configuration cache. Since configuration can be imported from
     # other libraries, we keep a cache for each library.
+    #
+    # @return [Hash]
     #
     def cache
       @cache ||= {}
@@ -120,6 +107,7 @@ module RC
     def current_tool
       File.basename(ENV['tool'] || $0)
     end
+
     alias current_command current_tool
 
     #
@@ -128,6 +116,7 @@ module RC
     def current_tool=(tool)
       ENV['tool'] = tool.to_s
     end
+
     alias current_command= current_tool=
 
     #
@@ -148,15 +137,13 @@ module RC
       end
     end
 
-    # TODO: Maybe properties should come from Configuration class and be per-gem.
-    #       I don't see a use for imported properties, but just in case.
-
     #
     # Properties of the current project. These can be used in a project's config file
     # to make configuration more interchangeable. Presently project properties are 
-    # gathered from .ruby YAML or .gemspec.
+    # gathered from .index YAML or .gemspec.
     #
-    # NOTE: How properties are gathered will be refined in the future.
+    # It's important to note that properties are not per-gem. Rather they are global
+    # and belong only the current project.
     #
     def properties
       $properties ||= Properties.new
@@ -170,6 +157,7 @@ module RC
     def unconfigure(tool)
       @setup[tool.to_s] = false
     end
+
     alias :unset :unconfigure
 
     #
@@ -285,7 +273,7 @@ module RC
     end
 
     #
-    # Setup rc system.
+    # Setup the system.
     #
     def bootstrap
       @bootstrap ||= (
@@ -295,10 +283,9 @@ module RC
       )
     end
 
-    # TODO: Also add loaded callback ?
-
     #
-    # Override require.
+    # Tap into require via loaded hook. The hook is only
+    # triggered on #require, not #load.
     #
     def bootstrap_require
       def Kernel.loaded(feature, options={})
@@ -326,7 +313,7 @@ module RC
     end
 
     ##
-    ## IDEA: Preconfigurations occur before other comamnd configs and
+    ## IDEA: Preconfigurations occur before other command configs and
     ##       do not require feature.
     ##
     #def preconfigure(options={})
@@ -337,22 +324,12 @@ module RC
     #    c.call if c.match?(tool, profile)
     #  end
     #end
-
   end
 
+  # The Interface extends RC module.
   extend Interface
 
-  bootstrap  # prepare system
-end
+  # Prep the system.
+  bootstrap
 
-# Toplevel convenience method for `RC.config_handler`.
-#
-# @example
-#   configure 'qed' do |config|
-#     QED.configure(config.profile, &config)
-#   end
-#
-def self.configure(tool, options={}, &block)
-  RC.configure(tool, options, &block)
 end
-

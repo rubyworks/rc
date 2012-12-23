@@ -30,12 +30,6 @@ module RC
     #
     CONFIG_DIR = '{.,}rc'
 
-    #
-    # Looking for a config file relative to root of a project,
-    # these are the files considered to indicate the root directory.
-    #
-    ROOT_INDICATORS = %w{.git .hg _darcs .index .rc .ruby}
-
     class << self
       #
       # Load configuration file from local project or other gem.
@@ -85,17 +79,6 @@ module RC
           paths = dir ? Dir.glob(File.join(dir, '**/*')) : []
         end
 
-        #if root = lookup_root
-        #  glob = File.join(root, CONFIG_FILE)
-        #  file = Dir.glob(glob, File::FNM_CASEFOLD).find{ |f| File.file?(f) }
-        #  if file
-        #    paths << file
-        #  else
-        #    dir = Dir.glob(File.join(root, CONFIG_DIR), File::FNM_CASEFOLD).first
-        #    paths.concat Dir.glob(File.join(dir, '**/*')) if dir
-        #  end
-        #end
-
         files = paths.select{ |path| File.file?(path) }
 
         new(*files)
@@ -113,19 +96,6 @@ module RC
           paths = Dir.glob(File.join(pwd, glob), flags)
           return paths unless paths.empty?
           break if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
-          pwd = File.dirname(pwd)
-        end
-        return nil
-      end
-
-      #
-      # Search upward from working directory.
-      #
-      def lookup_root
-        pwd  = File.expand_path(Dir.pwd)
-        home = File.expand_path('~')
-        while pwd != '/' && pwd != home
-          return pwd if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
           pwd = File.dirname(pwd)
         end
         return nil
@@ -391,7 +361,21 @@ module RC
     end
 
     #
-    class DSL
+    # Search upward from project root directory.
+    #
+    def lookup_root
+      pwd  = File.expand_path(Dir.pwd)
+      home = File.expand_path('~')
+      while pwd != '/' && pwd != home
+        return pwd if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
+        pwd = File.dirname(pwd)
+      end
+      return nil
+    end
+
+    # Configuration::DSL
+    #
+    class DSL < Module
 
       #
       #
