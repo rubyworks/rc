@@ -13,15 +13,7 @@ module RC
     #
     # Runtime configuration file glob pattern.
     #
-    CONFIG_FILE = '{.,}{C,c}onfig.rb'
-
-    #
-    # A directory can be used instead of a file, named either `.rc` or `rc`,
-    # again case insensitive. When a directory is used all the files within
-    # the directory are loaded.
-    #
-    #CONFIG_DIR = '{.,}rc'
-    CONFIG_DIR = '{.,}config'
+    CONFIG_FILE = '.ruby'
 
     class << self
       #
@@ -43,38 +35,35 @@ module RC
       #
       # Load configuration from another gem.
       #
-      # TODO: Make sure Find.path is case insensitive for the file.
-      #
-      def load_from(gem)
-        file = Find.path(CONFIG_FILE, :from=>gem).find{ |f| File.file?(f) }
-
-        if file
-          paths = [file]
-        else
-          paths = Find.path(CONFIG_DIR + '/**/*', :from=>gem)
-        end
-
-        files = paths.select{ |path| File.file?(path) }
-
+      def load_from(gem, glob=nil)
+        files = Find.path(glob || CONFIG_FILE, :from=>gem)
+        files = files.select{ |f| File.file?(f) }
         new(*files)
+
+        #if file
+        #  paths = [file]
+        #else
+        #  #paths = Find.path(CONFIG_DIR + '/**/*', :from=>gem)
+        #end
+        #files = paths.select{ |path| File.file?(path) }
+        #new(*files)
       end
 
       #
       # Load configuration for current project.
       #
-      def load_local()
-        file = lookup(CONFIG_FILE, File::FNM_CASEFOLD).find{ |f| File.file?(f) }
-
-        if file
-          paths = [file]
-        else
-          dir = lookup(CONFIG_DIR).find{ |f| File.directory?(f) }
-          paths = dir ? Dir.glob(File.join(dir, '**/*')) : []
-        end
-
-        files = paths.select{ |path| File.file?(path) }
-
+      def load_local(glob=nil)
+        files = lookup(glob || CONFIG_FILE)
+        files = files.find{ |f| File.file?(f) }
         new(*files)
+
+        #if file
+        #  paths = [file]
+        #else
+        #  dir = lookup(CONFIG_DIR).find{ |f| File.directory?(f) }
+        #  paths = dir ? Dir.glob(File.join(dir, '**/*')) : []
+        #end
+        #files = paths.select{ |path| File.file?(path) }
       end
 
     private
