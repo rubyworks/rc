@@ -35,10 +35,10 @@ module RC
       #
       # Load configuration from another gem.
       #
-      def load_from(gem, glob=nil)
-        files = Find.path(glob || CONFIG_FILE, :from=>gem)
-        files = files.select{ |f| File.file?(f) }
-        new(*files)
+      def load_from(gem)
+        files = Find.path(CONFIG_FILE, :from=>gem)
+        file  = files.find{ |f| File.file?(f) }
+        new(*file)
 
         #if file
         #  paths = [file]
@@ -52,10 +52,10 @@ module RC
       #
       # Load configuration for current project.
       #
-      def load_local(glob=nil)
-        files = lookup(glob || CONFIG_FILE)
-        files = files.find{ |f| File.file?(f) }
-        new(*files)
+      def load_local
+        files = lookup(CONFIG_FILE)
+        file  = files.find{ |f| File.file?(f) }
+        new(*file)
 
         #if file
         #  paths = [file]
@@ -144,6 +144,8 @@ module RC
     # Load configuration files.
     #
     # TODO: begin/rescue around instance_eval?
+    #
+    # TODO: Does each file need it's own DSL instance?
     #
     def load_files(*files)
       dsl = DSL.new(self)

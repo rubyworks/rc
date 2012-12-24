@@ -2,8 +2,8 @@
  
 ## Configuration Importing
 
-Configurations can be imported from another project
-using the `:from` option.
+Configurations can be imported from another project using
+the `:from` option.
 
     rc = RC::Configuration.new
 
