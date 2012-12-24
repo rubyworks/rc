@@ -11,27 +11,17 @@ module RC
     include Enumerable
 
     #
-    # Runtime configuration file glob pattern. The standard configuration
-    # file name is `.rc` or `RC.rb`. These are not case sensitive, but these
-    # cases are typical. The `.rb` suffix is optional in either case, and
-    # the a `file` suffix can be use too, e.g. `RCfile`, if you are into 
-    # that whole "Foofile" thing.
+    # Runtime configuration file glob pattern.
     #
-    # TODO: Ok, maybe that is too many choices for rc file name, but it is
-    # hard to settle on a smaller set. If you think some should be removed
-    # please come argue with us about what's best. Honestly I am half inclined
-    # to  make it `.rc` or `.rc.rb` period, and anything else one'd like to use,
-    # would route through that with `import "RCfile"` or whatever.
-    #
-    CONFIG_FILE = '{.,}{rc,Rc,RC}{file,}{,.rb}'
-    #CONFIG_FILE = '{.rc,.rc.rb,RC.rb,Rc.rb,rc.rb,RCfile,Rcfile,rcfile,RCfile.rb,Rcfile.rb,rcfile.rb}'
+    CONFIG_FILE = '{.,}{C,c}onfig.rb'
 
     #
     # A directory can be used instead of a file, named either `.rc` or `rc`,
     # again case insensitive. When a directory is used all the files within
     # the directory are loaded.
     #
-    CONFIG_DIR = '{.,}rc'
+    #CONFIG_DIR = '{.,}rc'
+    CONFIG_DIR = '{.,}config'
 
     class << self
       #
@@ -101,7 +91,7 @@ module RC
           break if ROOT_INDICATORS.any?{ |r| File.exist?(File.join(pwd, r)) }
           pwd = File.dirname(pwd)
         end
-        return nil
+        return []
       end
 
     end
