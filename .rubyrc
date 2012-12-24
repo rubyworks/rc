@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-import 'ruby/**/*.rb'
+import 'ruby/**/*rc.rb'
 
 config 'pry' do
   puts "Pry on RC!"
