@@ -13,7 +13,7 @@ module RC
     #
     # Runtime configuration file glob pattern.
     #
-    CONFIG_FILE = '.ruby'
+    CONFIG_FILE = '.ruby{rc,}'
 
     class << self
       #
