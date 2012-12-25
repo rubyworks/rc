@@ -1,27 +1,8 @@
+#require 'finder/import'
+
 module Kernel
 
   private
-
-=begin
-  #
-  # Evaluate script directly into current scope.
-  #
-  def import(feature)
-    file = Find.feature(feature, :absolute=>true).first
-    raise LoadError, "no such file -- #{feature}" unless file
-    instance_eval(::File.read(file), file) if file
-  end
-
-  #
-  # Evaluate script directly into current scope.
-  #
-  # TODO: Shouldn't this be relative to calling file instead of Dir.pwd?
-  #
-  def import_relative(file)
-    raise LoadError, "no such file -- #{file}" unless File.file?(file)
-    instance_eval(::File.read(file), file) if file
-  end
-=end
 
   #
   # Alias original Kernel#require method.
