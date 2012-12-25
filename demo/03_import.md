@@ -2,31 +2,30 @@
  
 ## Configuration Importing
 
-Configurations can be imported from another project using
-the `:from` option.
+Configurations can be imported from another project using the `:from` option.
 
     rc = RC::Configuration.new
 
-    rc.config :qed, :profile=>'example', :from=>'qed'
+    rc.config :qed, :profile=>'example', :from=>'test'
 
     rc.to_a.size.assert == 1
 
 The configuration can also be imported from a different profile.
 
-    rc.config :qed, :profile=>:coverage, :from=>['qed', :profile=>:simplecov]
+    rc.config :qed, :profile=>:coverage, :from=>['test', :profile=>'simplecov']
 
     rc.to_a.size.assert == 2
 
-Although it will rarely be of use, it may also be imported from another
-feature or commandline tool.
+Although it will very rarely be of use, it may also be imported from another
+feature or command too.
 
-    rc.config :example, :from=>['qed', :command=>:sample]
+    rc.config :example, :from=>['test', :command=>'sample']
 
 Imported configurations can also be augmented via a block.
 
     rc = RC::Configuration.new
 
-    rc.config :qed, :from=>['qed', :profile=>:simplecov] do
+    rc.config :qed, :from=>['test', :profile=>'simplecov'] do
       # additional code here
     end
 
