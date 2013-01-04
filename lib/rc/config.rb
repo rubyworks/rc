@@ -1,28 +1,37 @@
 module RC
 
-  # Config encapsulates a single configuration entry as defined
-  # in a project's configuration file.
-  # 
+  # Config encapsulates a single configuration entry as defined in a project's
+  # ruby rc file. A config consists of a possible `command`, `feature`,
+  # `profile` and `onload` flag.
+  #
+  # If `command` or `feature` are nil, then the configuration applies to all
+  # commands and/or features.
+  #
+  # If profile is `nil` it automatically becomes `default`, which is the 
+  # profile used when no profile is specified.
+  #
   class Config
 
     #
     # Initialize Config instance. Config instances are per-configuration,
     # which means they are associated with one and only one config entry.
     #
-    # @param [#to_sym] tool
-    #   The tool's name.
-    #
-    # @param [#to_sym,nil] profile
-    #   Profile name, or +nil+.
+    # @param [#to_s] target 
+    #   The command or feature name. (optional)
     #
     # @param [Hash] properties
     #   Any additional properties associated with the config entry.
     #
-    def initialize(tool, properties={}, &block)
-      @property = {:profile=>'default'}
+    def initialize(*args, &block)
+      properties = (Hash === args.last ? args.pop : {})
+      target     = args.first
 
-      @property[:command] = tool.to_s
-      @property[:feature] = tool.to_s
+      @property = {:command=>nil, :feature=>nil, :profile=>'default'}
+
+      if target
+        @property[:command] = target.to_s
+        @property[:feature] = target.to_s
+      end
 
       @block = block
 
@@ -35,15 +44,10 @@ module RC
     # Get/set property.
     #
     def property(name, value=ArgumentError)
-      name = name.to_sym
-
-      return @property[name] if value == ArgumentError
-
-      case name
-      when :feature, :command, :profile
-        @property[name] = value.to_s
+      if value == ArgumentError
+        get(name)
       else
-        @property[name] = value
+        set(name)
       end
     end
 
@@ -61,9 +65,7 @@ module RC
       @property[:command]
     end
 
-    #
-    # @todo Deprecate?
-    #
+    # @todo Deprecate #tool alias?
     alias :tool :command
 
     #
@@ -75,7 +77,6 @@ module RC
 
     #
     # The library from which this configuration derives.
-    # This is a shortcut for `property(:from)`.
     #
     def from
       @property[:from]
@@ -142,7 +143,7 @@ module RC
     ## @return [Hash]
     ##
     #def to_h
-    #  HashBuilder.new(&self)).to_h
+    #  HashBuilder.new(&self).to_h
     #end
 
     #
@@ -170,9 +171,9 @@ module RC
     def match?(*args)
       props = Hash === args.last ? args.pop : {}
 
-      if tool = args.shift
-        props[:command] = tool.to_s
-        props[:feature] = tool.to_s
+      if target = args.shift
+        props[:command] = target.to_s
+        props[:feature] = target.to_s
       end
 
       if props[:profile]
@@ -180,7 +181,8 @@ module RC
       end
 
       props.each do |k,v|
-        return false unless property(k) == v
+        pv = property(k)
+        return false unless (pv.nil? || pv == v)
       end
 
       return true
@@ -192,6 +194,7 @@ module RC
     # @return [Boolean]
     #
     def feature?(feature=RC.current_feature)
+      return true if self.feature.nil?
       self.feature == feature.to_s
     end
 
@@ -201,6 +204,7 @@ module RC
     # @return [Boolean]
     #
     def command?(command=RC.current_command)
+      return true if self.command.nil?
       self.command == command.to_s
     end
     alias_method :tool, :command?
@@ -211,7 +215,7 @@ module RC
     # @return [Boolean]
     #
     def profile?(profile=RC.current_profile)
-      self.profile == (profile || :default).to_s
+      self.profile == (profile || 'default').to_s
     end
 
     #
@@ -252,6 +256,48 @@ module RC
       return false unless command? if command
       return false unless profile? if profile
       return true
+    end
+
+  private
+
+    #
+    # Get property.
+    #
+    def get(name)
+      @property[name.to_sym]
+    end
+
+    #
+    # Set property.
+    #
+    def set(name, value)
+      case name.to_sym
+      when :command
+        self.command = value
+      when :tool  # deprecate ?
+        self.command = value
+      when :feature
+        self.feature = value
+      when :profile
+        self.profile = value
+      else
+        @property[name.to_sym] = value
+      end
+    end
+
+    #
+    def command=(name)
+      @property[:command] = name ? name.to_str : nil
+    end
+
+    #
+    def feature=(path)
+      @property[:feature] = path ? path.to_str : nil
+    end
+
+    #
+    def profile=(name)
+      @property[:profile] = name ? name.to_str : 'default'
     end
 
   end
