@@ -11,6 +11,7 @@ module RC
   require 'rc/core_ext'
   require 'rc/config'
   require 'rc/configuration'
+  require 'rc/dsl'
   #require 'rc/config_filter'
   require 'rc/properties'
   require 'rc/setup'
