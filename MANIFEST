@@ -1,6 +1,6 @@
-#!mast -x *.lock .index .ruby .yardopts bin demo lib man spec test [A-Z]*.*
+#!mast -x *.lock .index .ruby .rubyrc .yardopts bin demo lib man spec test *.txt *.md
 .index
-.ruby
+.rubyrc
 .yardopts
 demo/00_concept.md
 demo/01_config.md
@@ -9,7 +9,7 @@ demo/03_import.md
 demo/06_interface.md
 demo/applique/ae.rb
 demo/applique/file.rb
-demo/applique/fixture/rc.rb
+demo/applique/fixture/.ruby
 demo/applique/fixture.rb
 demo/cov.rb
 lib/c.rb
@@ -17,14 +17,20 @@ lib/rc/api.rb
 lib/rc/config.rb
 lib/rc/config_filter.rb
 lib/rc/configuration.rb
+lib/rc/constants.rb
+lib/rc/core_ext/argv.rb
+lib/rc/core_ext/hash.rb
+lib/rc/core_ext/kernel.rb
+lib/rc/core_ext/string.rb
+lib/rc/core_ext/symbol.rb
 lib/rc/core_ext.rb
+lib/rc/dsl.rb
 lib/rc/interface.rb
 lib/rc/properties.rb
+lib/rc/required.rb
 lib/rc/setup.rb
 lib/rc/tweaks/rake.rb
 lib/rc.rb
-NOTES.md
 LICENSE.txt
 HISTORY.md
 README.md
-RC.rb
