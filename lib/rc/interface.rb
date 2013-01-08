@@ -243,7 +243,7 @@ module RC
     #
     #
     def autoconfig?
-      @autoconfigure
+      @autoconfig
     end
 
   protected
@@ -293,7 +293,7 @@ module RC
     # triggered on #require, not #load.
     #
     def bootstrap_require
-      def Kernel.required(feature)
+      def RC.required(feature)
         config = RC.configuration[feature]
         if config
           config.each do |config|
