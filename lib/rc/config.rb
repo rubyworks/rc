@@ -287,17 +287,17 @@ module RC
 
     #
     def command=(name)
-      @property[:command] = name ? name.to_str : nil
+      @property[:command] = name ? name.to_s : nil
     end
 
     #
     def feature=(path)
-      @property[:feature] = path ? path.to_str : nil
+      @property[:feature] = path ? path.to_s : nil
     end
 
     #
     def profile=(name)
-      @property[:profile] = name ? name.to_str : 'default'
+      @property[:profile] = name ? name.to_s : 'default'
     end
 
   end
