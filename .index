@@ -60,7 +60,9 @@ summary: The best way to manage your application's configuration.
 title: RC
 version: 0.3.1
 name: rc
-description: ! 'R.C. is a multi-tenant configuration system for Ruby projects.
+description: ! 'R.C. is a multi-tenant runtime configuration system for Ruby projects.
 
-  R.C. can configure almost any Ruby tool or library.'
+  It can be used to configure almost any Ruby tool or library regardless
+
+  of whether that tool or library has dedicated support for RC or not.'
 date: '2013-01-08'

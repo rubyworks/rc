@@ -1,2 +1,3 @@
-R.C. is a multi-tenant configuration system for Ruby projects.
-R.C. can configure almost any Ruby tool or library.
+R.C. is a multi-tenant runtime configuration system for Ruby projects.
+It can be used to configure almost any Ruby tool or library regardless
+of whether that tool or library has dedicated support for RC or not.
