@@ -3,21 +3,20 @@
 ## 0.3.0 / 2012-12-22
 
 This release is of the project finally begins to settle down the API.
-The most significant change since the last release is the use of `RC.rb`
-or `.rc` as the name for the standard configuration file. Technically
-the name can be any case-insensitive variation of `rc` or `rcfile` with
-optional `.rb` extension, hidden or not. It was decided to change from
-the previous `Config.rb` file name in order to avoid any confusion with
-Rails `config` directory or any other use of this common term. If you
-still prefer the old name, simply add a `.rc` file to your project 
-containing `import "Config.rb"` to get equivalent functionality.
-Other than that the majority of changes have bee to improve the library
+The most significant change since the last release is the use of `.rubyrc`,
+or just `.ruby`, as the name for the standard configuration file. It was 
+changed from the previous `Config.rb` file name in order to avoid any
+confusion with Rails `config` directory or any other use of the word.
+If you still prefer the old name, simply add a `.rubyrc` file to your
+project containing `import "Config.rb"` to get equivalent functionality.
+Other than that the majority of changes have been to improve the library
 internally.
 
 Changes:
 
-* Change default config file name to `RC.rb` or hidden `.rc`.
+* Change default config file name to `.rubyrc`, or just `.ruby`.
 * Improve configuration loading code.
+* Remove dependency on Courtier.
 
 
 ## 0.2.0 / 2012-04-16
