@@ -73,8 +73,9 @@ end
 # Rake tasks 
 #
 config 'rake' do
+  task :default => [:test]
   desc 'run unit tests'
-  task 'test' do
+  task :test do
     puts "Rake Boo!"
   end
 end

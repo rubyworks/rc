@@ -1,5 +1,16 @@
 # RELEASE HISTORY
 
+## 0.3.1 / 2012-13-09
+
+This is bug fix release.
+
+Changes:
+
+* Fix rake tweak. Use `RC.configure` instead of `court`.
+* Fix #autoconfig? method's instance variable.
+* Fix #bootstrap_require to override correct hook.
+
+
 ## 0.3.0 / 2012-13-08
 
 This release is of the project finally begins to settle down the API.
