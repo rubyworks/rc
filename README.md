@@ -35,22 +35,21 @@ Then add `-rc` to your system's `RUBYOPT` environment variable.
     $ export RUBYOPT='-rc'
 
 You will want to add that to your `.bashrc`, `.profile` or equivalent configuration
-script, so it always available.
+script, so it is always available.
 
 
 ## Instruction
 
-To use RC in a project create a configuration file called either `.rc` or `RC.rb`. 
-Technically the file can be any variation of `rc` with an optional `.rb` extension,
-hidden or not and case-insensitive. Hidden file names have precedence if multiple
-matches exist. In this file add configuration blocks by name of the commandline tool.
+To use RC in a project create a configuration file called either `.ruby` or `.rubyrc`. 
+The longer name has precedence if both are present. In this file add configuration blocks
+by name of the commandline tool.
 
 For example, let's demonstrate how we could use this to configure Rake tasks.
-(Yes, Rake is not the most obvious choice, since most developers are just as happy
-to keep using a Rakefile. But a Rake example serves to show that it can be done,
-and also it makes a good tie-in with next example.)
+(Yes, Rake is not the most obvious choice, since developers are just as happy
+to keep using a Rakefile. But using Rake as an example serves to show that it
+*can* be done, and also it makes a good tie-in with next example.)
 
-    $ cat Config.rb
+    $ cat .rubyrc
     config :rake do
       desc 'generate yard docs'
       task :yard do
@@ -63,7 +62,7 @@ Now when `rake` is run the tasks defined in this configuration will be available
 You might wonder why anyone would do this. That's where the *multi-tenancy*
 comes into play. Let's add another configuration.
 
-    $ cat Config.rb
+    $ cat .rubyrc
     title = "MyApp"
 
     config :rake do
@@ -119,6 +118,13 @@ line option for specifying the profile.
 
 Beyond mere namespacing, some tools might utilize profiles for a more specific
 purpose fitting the tool. Consult the tool's documentation for details.
+
+Configurations can also be pulled in from other gems using the `from` option.
+
+    config :qed, :profile=>'simplecov', :from=>'qed'
+
+As long as a project includes its `.rubyrc` file (and any imported files)
+in it's gem package, it's possible to share configurations in this manner.
 
 
 ## Customization
