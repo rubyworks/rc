@@ -1,6 +1,6 @@
 # RELEASE HISTORY
 
-## 0.3.0 / 2012-12-22
+## 0.3.0 / 2012-13-08
 
 This release is of the project finally begins to settle down the API.
 The most significant change since the last release is the use of `.rubyrc`,
