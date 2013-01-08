@@ -21,6 +21,10 @@ requirements:
   - test
   development: true
   name: ae
+- groups:
+  - test
+  development: true
+  name: test
 conflicts: []
 alternatives: []
 resources:

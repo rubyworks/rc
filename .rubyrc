@@ -16,7 +16,7 @@ end
 # IMPORTANT! Unfortunately this will not give us a reliable report
 # b/c QED uses the RC gem, so SimpleCov can't differentiate the two.
 #
-config 'qed', profile: 'cov' do
+config 'qed', :profile=>'cov' do
   puts "QED w/coverage!"
 
   require 'simplecov'
@@ -68,7 +68,6 @@ config 'detroit' do |asm|
                 'log/changes.html']
   end
 end
-
 
 #
 # Rake tasks 
