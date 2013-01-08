@@ -47,7 +47,7 @@ module RC
       if value == ArgumentError
         get(name)
       else
-        set(name)
+        set(name, value)
       end
     end
 
