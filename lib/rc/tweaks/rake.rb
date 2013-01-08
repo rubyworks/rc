@@ -1,6 +1,6 @@
 require 'rake'
 
-court 'rake' do |config|
+RC.configure 'rake' do |config|
   Module.new do
     extend Rake::DSL
     module_eval(&config)
@@ -8,7 +8,7 @@ court 'rake' do |config|
 end
 
 module Rake
-  RC_FILES = '.config.rb', 'config.rb', 'Config.rb'
+  RC_FILES = '.rubyrc', '.ruby'
 
   class Application
     remove_const(:DEFAULT_RAKEFILES)
@@ -28,4 +28,5 @@ module Rake
 end
 
 # Must manually configure tweaked libraries.
-RC.configure('rake')
+#RC.send(:configure_tool, 'rake')
+
