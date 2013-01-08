@@ -30,7 +30,7 @@ Changes:
 * Overhaul and drastically simplify design.
 
 
-## 0.1.1 . 2012-04-09
+## 0.1.1 / 2012-04-09
 
 Initial release of RC. 
 
