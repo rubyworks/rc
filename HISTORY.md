@@ -2,7 +2,7 @@
 
 ## 0.3.1 / 2012-13-09
 
-This is bug fix release.
+This is bug fix release that addresses a couple of stupid oversights.
 
 Changes:
 
