@@ -3,7 +3,8 @@
 [Homepage](http://rubyworks.github.com/rc) /
 [Report Issue](http://github.com/rubyworks/rc/issues) /
 [Source Code](http://github.com/rubyworks/rc)
-( [![Build Status](https://secure.travis-ci.org/rubyworks/rc.png)](http://travis-ci.org/rubyworks/rc) )
+( [![Build Status](https://secure.travis-ci.org/rubyworks/rc.png)](http://travis-ci.org/rubyworks/rc)
+  [![Gem Version](https://badge.fury.io/rb/rc.png)](http://badge.fury.io/rb/rc) )
 
 
 ## About
