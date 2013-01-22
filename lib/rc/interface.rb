@@ -153,15 +153,11 @@ module RC
     end
 
     #
-    # Remove a configuration setup.
-    # 
-    # NOTE: This is probably a YAGNI.
+    # Configure current tool.
     #
-    def unconfigure(tool)
-      @setup[tool.to_s] = false
+    def configure(tool=nil)
+      configure_tool(tool || RC.current_tool)
     end
-
-    alias :unset :unconfigure
 
     #
     # Define a custom configuration handler.
@@ -169,7 +165,7 @@ module RC
     # If the current tool matches the given tool, and autoconfiguration is not being used,
     # then configuration is applied immediately.
     #
-    def configure(tool, options={}, &block)
+    def define_config(tool, options={}, &block)
       tool = tool.to_s
 
       @setup ||= {}
@@ -177,20 +173,30 @@ module RC
       if block
         @setup[tool] = Setup.new(tool, options, &block)
 
-        if tool == current_tool
-          configure_tool(tool) unless autoconfig?
-        end
+        # REMOVED: Doing this automatically made it impossible for tools to set the profile.
+        #if tool == current_tool
+        #  configure_tool(tool) unless autoconfig?
+        #end
       end     
 
       @setup[tool]
     end
 
     #
-    # Original name of `#configure`.
+    # Original name of `#define_config`.
     #
-    def setup(tool, options={}, &block)
-      configure(tool, options, &block)
+    alias :setup :define_config
+
+    #
+    # Remove a configuration setup.
+    # 
+    # NOTE: This is probably a YAGNI.
+    #
+    def undefine_config(tool)
+      @setup[tool.to_s] = false
     end
+
+    alias :unset :undefine_config
 
     #
     # Set current profile via ARGV switch. This is done immediately,
