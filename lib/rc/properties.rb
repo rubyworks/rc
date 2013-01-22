@@ -17,6 +17,7 @@ module RC
     def initialize(path=nil)
       @root  = find_root(path || Dir.pwd)
       @index = load_index
+      @var   = {}
     end
 
     #
