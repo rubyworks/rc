@@ -1,5 +1,5 @@
 --title "Runtime Configuration"
---readme README.rdoc
+--readme README.md
 --protected
 --private
 lib

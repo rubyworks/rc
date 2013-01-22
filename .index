@@ -1,6 +1,6 @@
 ---
-type: ruby
 revision: 2013
+type: ruby
 sources:
 - var
 authors:
@@ -48,21 +48,22 @@ repositories:
   scm: git
   uri: git://github.com/rubyworks/rc.git
 categories: []
-paths:
-  load:
-  - lib
 copyrights:
 - holder: Rubyworks
   year: '2011'
   license: BSD-2-Clause
+customs: []
+paths:
+  lib:
+  - lib
 created: '2011-11-06'
 summary: The best way to manage your application's configuration.
 title: RC
-version: 0.3.1
+version: 0.4.0
 name: rc
 description: ! 'R.C. is a multi-tenant runtime configuration system for Ruby projects.
 
   It can be used to configure almost any Ruby tool or library regardless
 
   of whether that tool or library has dedicated support for RC or not.'
-date: '2013-01-08'
+date: '2013-01-22'
